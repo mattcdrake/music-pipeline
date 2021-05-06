@@ -19,26 +19,41 @@ interface IState {
   apiURL: URL;
   page: number;
   albums: Album[];
+  triggerGetAlbumsRef: React.RefObject<HTMLSpanElement>;
+  observer: IntersectionObserver;
 }
 
 class App extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props);
+    this.getNextPage = this.getNextPage.bind(this);
+    this.handleObserver = this.handleObserver.bind(this);
     this.state = {
       apiURL: config.serverURL,
       page: 0,
       albums: [],
+      triggerGetAlbumsRef: React.createRef(),
+      observer: new IntersectionObserver(this.handleObserver),
     };
   }
 
-  async componentDidMount() {
-    const albums = await this.getAlbums(this.state.page);
-    this.appendAlbums(albums);
+  handleObserver(entries: IntersectionObserverEntry[]) {
+    if (entries[0].isIntersecting) {
+      this.getNextPage();
+    }
   }
 
   appendAlbums(albums: Album[]) {
     this.setState((prevState) => ({
       albums: prevState.albums.concat(albums),
+    }));
+  }
+
+  async getNextPage() {
+    const albums = await this.getAlbums(this.state.page);
+    this.appendAlbums(albums);
+    this.setState((prevState) => ({
+      page: prevState.page + 1,
     }));
   }
 
@@ -58,7 +73,6 @@ class App extends React.Component<IProps, IState> {
   }
 
   render() {
-    console.log(this.state.albums);
     return (
       <div>
         <Navbar />
@@ -66,7 +80,11 @@ class App extends React.Component<IProps, IState> {
           <Header />
           <FilterBar />
         </div>
-        <AlbumsContainer albums={this.state.albums} />
+        <AlbumsContainer
+          albums={this.state.albums}
+          observer={this.state.observer}
+          triggerGetAlbumsRef={this.state.triggerGetAlbumsRef}
+        />
       </div>
     );
   }
