@@ -1,14 +1,14 @@
 import { Album } from "./types";
 
 const faker = require("faker");
-const albumsMax = 100;
-const pageSize = 10;
+const albumsMax = 1000;
+const pageSize = 30;
 
 // Fake album data
 const albums: Album[] = [];
 albums.push({
   artist: `${faker.name.firstName()} ${faker.name.lastName()} ${faker.name.lastName()}`,
-  title: faker.lorem.words(Math.floor(Math.random() * 10) + 1),
+  title: faker.lorem.words(Math.floor(Math.random() * 10) + 7),
   releaseDate: faker.date.future(),
   coverURL: new URL(faker.image.image(200, 200)),
 });

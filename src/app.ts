@@ -10,6 +10,10 @@ app.enable("trust proxy");
 const PORT = process.env.PORT || 8080;
 const url = "https://localhost:8080";
 
+// CORS
+const cors = require("cors");
+app.use(cors());
+
 // Middleware
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
