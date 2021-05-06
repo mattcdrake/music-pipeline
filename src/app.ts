@@ -14,10 +14,6 @@ const url = "https://localhost:8080";
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.status(200).send("HW5 Boat API").end();
-});
-
 app.get("/api/albums/:pageNum", async (req, res) => {
   const albums = await fakeAPI.getAlbums(parseInt(req.params.pageNum, 10));
   res.status(200).json(albums);
