@@ -7,6 +7,9 @@ module.exports = {
         primary: "#ff4573",
         secondary: "#ff99b2",
       },
+      height: {
+        84: "21rem",
+      },
     },
   },
   variants: {

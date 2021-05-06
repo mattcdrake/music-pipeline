@@ -54,7 +54,6 @@ class App extends React.Component<IProps, IState> {
       coverURL: new URL(rawAlbum.coverURL),
     }));
 
-    console.log("received", albums);
     return albums;
   }
 
