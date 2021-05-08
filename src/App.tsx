@@ -19,7 +19,7 @@ interface IState {
   apiURL: URL;
   page: number;
   albums: Album[];
-  dateFilter?: Date;
+  dateFilter: Date;
   triggerGetAlbumsRef: React.RefObject<HTMLSpanElement>;
   observer: IntersectionObserver;
 }
@@ -33,6 +33,7 @@ class App extends React.Component<IProps, IState> {
     this.state = {
       apiURL: config.serverURL,
       page: 0,
+      dateFilter: new Date(),
       albums: [],
       triggerGetAlbumsRef: React.createRef(),
       observer: new IntersectionObserver(this.handleObserver),
@@ -46,9 +47,9 @@ class App extends React.Component<IProps, IState> {
   }
 
   updateDateFilter(date: Date) {
-    this.setState(() => ({
+    this.setState({
       dateFilter: date,
-    }));
+    });
   }
 
   appendAlbums(albums: Album[]) {
@@ -91,11 +92,7 @@ class App extends React.Component<IProps, IState> {
         <AlbumsContainer
           // Only include albums that are beyond the date filter
           albums={this.state.albums.filter((album) => {
-            if (this.state.dateFilter) {
-              return album.releaseDate > this.state.dateFilter;
-            } else {
-              return true;
-            }
+            return album.releaseDate > this.state.dateFilter;
           })}
           observer={this.state.observer}
           triggerGetAlbumsRef={this.state.triggerGetAlbumsRef}
