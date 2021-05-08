@@ -19,6 +19,7 @@ interface IState {
   apiURL: URL;
   page: number;
   albums: Album[];
+  dateFilter?: Date;
   triggerGetAlbumsRef: React.RefObject<HTMLSpanElement>;
   observer: IntersectionObserver;
 }
@@ -28,6 +29,7 @@ class App extends React.Component<IProps, IState> {
     super(props);
     this.getNextPage = this.getNextPage.bind(this);
     this.handleObserver = this.handleObserver.bind(this);
+    this.updateDateFilter = this.updateDateFilter.bind(this);
     this.state = {
       apiURL: config.serverURL,
       page: 0,
@@ -41,6 +43,12 @@ class App extends React.Component<IProps, IState> {
     if (entries[0].isIntersecting) {
       this.getNextPage();
     }
+  }
+
+  updateDateFilter(date: Date) {
+    this.setState(() => ({
+      dateFilter: date,
+    }));
   }
 
   appendAlbums(albums: Album[]) {
@@ -78,10 +86,17 @@ class App extends React.Component<IProps, IState> {
         <Navbar />
         <div className="container mx-auto px-4 pt-8">
           <Header />
-          <FilterBar />
+          <FilterBar updateDateFilter={this.updateDateFilter} />
         </div>
         <AlbumsContainer
-          albums={this.state.albums}
+          // Only include albums that are beyond the date filter
+          albums={this.state.albums.filter((album) => {
+            if (this.state.dateFilter) {
+              return album.releaseDate > this.state.dateFilter;
+            } else {
+              return true;
+            }
+          })}
           observer={this.state.observer}
           triggerGetAlbumsRef={this.state.triggerGetAlbumsRef}
         />
