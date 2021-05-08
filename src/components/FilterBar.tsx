@@ -13,6 +13,7 @@ export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
   constructor(props: FilterBarProps) {
     super(props);
     this.handleDateClick = this.handleDateClick.bind(this);
+    this.handleFilterClick = this.handleFilterClick.bind(this);
 
     const inputDateStr = this.dateToInputStr();
     this.state = {
@@ -37,28 +38,52 @@ export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
   }
 
   // This needs to set initialDate when filters are removed
-  handleFilterClick(event: ChangeEvent<HTMLInputElement>) {}
+  handleFilterClick() {
+    this.props.updateDateFilter(new Date(this.state.initialDate));
+    this.setState((prevState) => ({
+      currentDate: prevState.initialDate,
+    }));
+  }
 
   render() {
-    let removeFilter;
+    let removeDateFilter;
     if (this.state.currentDate !== this.state.initialDate) {
-      removeFilter = "";
+      removeDateFilter = (
+        <span onClick={this.handleFilterClick} className="ml-4 cursor-pointer">
+          &#x274C;
+        </span>
+      );
     }
 
-    return (
-      <div className="border rounded flex mt-12">
-        <label>
-          Date Filter:
-          {removeFilter}
-          <input
-            type="month"
-            className="mx-12"
-            onChange={this.handleDateClick}
-            value={this.state.currentDate}
-          ></input>
-        </label>
+    let removeGenreFilter;
 
-        <div className="border p-1 inline-block">Genre Filter</div>
+    return (
+      <div className="flex mt-12 mx-auto w-5/6 align-middle">
+        {/* Date filter section */}
+        <div>
+          <label className="h-full align-middle m-auto">
+            Date Filter:
+            {removeDateFilter}
+            <input
+              type="month"
+              className="border mx-4 align-middle cursor-pointer"
+              onChange={this.handleDateClick}
+              value={this.state.currentDate}
+            ></input>
+          </label>
+        </div>
+
+        {/* Genre filter section */}
+        <div>
+          <label className="h-full align-middle m-auto">
+            Genre Filter:
+            {removeGenreFilter}
+            <input
+              type="text"
+              className="border mx-4 align-middle cursor-text"
+            ></input>
+          </label>
+        </div>
         <div className="border p-1 inline-block ml-auto">Search bar</div>
       </div>
     );
