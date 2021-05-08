@@ -72,19 +72,6 @@ export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
             ></input>
           </label>
         </div>
-
-        {/* Genre filter section */}
-        <div>
-          <label className="h-full align-middle m-auto">
-            Genre Filter:
-            {removeGenreFilter}
-            <input
-              type="text"
-              className="border mx-4 align-middle cursor-text"
-            ></input>
-          </label>
-        </div>
-        <div className="border p-1 inline-block ml-auto">Search bar</div>
       </div>
     );
   }

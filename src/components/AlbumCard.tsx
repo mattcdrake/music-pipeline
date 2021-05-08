@@ -21,7 +21,7 @@ interface AlbumCardProps {
 
 export const AlbumCard = (props: AlbumCardProps) => {
   return (
-    <div className="border border-gray-400 shadow-2xl rounded-lg m-4 py-4 w-60 h-84 bg-gray-300 relative flex">
+    <div className="border border-gray-300 hover:border-pink-600 cursor-pointer shadow-2xl rounded-lg m-4 py-4 w-60 h-84 bg-gray-200 relative flex">
       <div className="flex mx-auto px-2 h-36">
         <div className="m-auto">
           <p className="text-lg font-bold text-center">
