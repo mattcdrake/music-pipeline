@@ -20,16 +20,16 @@ app.use(express.json());
 
 app.get("/api/albums/:pageNum", async (req, res) => {
   let albums;
-  if (req.query.month) {
-    // User has specified a month
-    albums = await fakeAPI.getAlbumsByMonth(
-      req.query.month,
-      parseInt(req.params.pageNum, 10)
-    );
-  } else if (req.query.genre) {
+  if (req.query.genre) {
     // User has specified a genre
     albums = await fakeAPI.getAlbumsByGenre(
       req.query.genre,
+      parseInt(req.params.pageNum, 10)
+    );
+  } else if (req.query.month) {
+    // User has specified a month
+    albums = await fakeAPI.getAlbumsByMonth(
+      req.query.month,
       parseInt(req.params.pageNum, 10)
     );
   } else {
