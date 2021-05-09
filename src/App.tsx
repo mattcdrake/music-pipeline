@@ -14,13 +14,18 @@ import { Album, RawAlbum } from "./types";
 // Config
 import { config } from "./config";
 
+interface IPageCache {
+  [key: string]: number;
+}
+
 interface IProps {}
 
 interface IState {
   apiURL: URL;
-  page: number;
+  pageCache: IPageCache;
   albums: Album[];
-  dateFilter: Date;
+  dateFilter: Date | undefined;
+  genreFilter: string | undefined;
   triggerGetAlbumsRef: React.RefObject<HTMLSpanElement>;
   observer: IntersectionObserver;
 }
@@ -31,15 +36,28 @@ class App extends React.Component<IProps, IState> {
     this.getNextPage = this.getNextPage.bind(this);
     this.handleObserver = this.handleObserver.bind(this);
     this.updateDateFilter = this.updateDateFilter.bind(this);
+    this.updateGenreFilter = this.updateGenreFilter.bind(this);
     this.replaceTrigger = this.replaceTrigger.bind(this);
+
+    // Initialize page cache using current date as filter and page number 0
+    const initialDate = new Date();
+    const dateFilterStr = this.dateToFilterStr(initialDate);
+    let pageCache: IPageCache = {};
+    pageCache[dateFilterStr] = 0;
+
     this.state = {
       apiURL: config.serverURL,
-      page: 0,
-      dateFilter: new Date(),
+      pageCache: pageCache,
+      dateFilter: undefined,
+      genreFilter: undefined,
       albums: [],
       triggerGetAlbumsRef: React.createRef(),
       observer: new IntersectionObserver(this.handleObserver),
     };
+  }
+
+  dateToFilterStr(date: Date): string {
+    return `${date.getFullYear()}-${date.getMonth() + 1}`;
   }
 
   handleObserver(entries: IntersectionObserverEntry[]) {
@@ -48,9 +66,16 @@ class App extends React.Component<IProps, IState> {
     }
   }
 
-  updateDateFilter(date: Date) {
+  updateDateFilter(date: Date | undefined) {
+    console.log(date);
     this.setState({
       dateFilter: date,
+    });
+  }
+
+  updateGenreFilter(genre: string) {
+    this.setState({
+      genreFilter: genre,
     });
   }
 
@@ -76,18 +101,62 @@ class App extends React.Component<IProps, IState> {
       return;
     }
     this.appendAlbums(albums);
+
+    let filterStr = this.getActiveFilterStr();
     this.setState(
-      (prevState) => ({
-        page: prevState.page + 1,
-      }),
+      {
+        pageCache: {
+          ...this.state.pageCache,
+          // Update active filter page
+          [filterStr]: this.state.pageCache[filterStr] + 1,
+        },
+      },
       this.replaceTrigger
     );
   }
 
+  // Creates a string of active filters. For use in getting albums and caching page numbers.
+  getActiveFilterStr(): string {
+    let filterStr = "";
+    if (this.state.dateFilter) {
+      filterStr += `${this.dateToFilterStr(this.state.dateFilter)}`;
+    }
+
+    if (this.state.genreFilter) {
+      filterStr += this.state.genreFilter;
+    }
+
+    return filterStr;
+  }
+
   async getAlbums(): Promise<Album[]> {
-    const res = await fetch(
-      `${this.state.apiURL.href}/albums/${this.state.page}`
-    );
+    // If there hasn't been a request for this filter yet, save the page/filter in cache
+    const filterStr = this.getActiveFilterStr();
+    let filterPg = 0;
+    if (filterStr in this.state.pageCache) {
+      filterPg = this.state.pageCache[filterStr];
+    } else {
+      this.setState({
+        pageCache: {
+          ...this.state.pageCache,
+          [filterStr]: 0,
+        },
+      });
+    }
+
+    let apiURL: string = `${this.state.apiURL.href}/albums/${filterPg}?`;
+
+    // Find the correct page for a given filter
+
+    if (this.state.genreFilter) {
+      apiURL += `genre=${this.state.genreFilter}&`;
+    }
+
+    if (this.state.dateFilter) {
+      apiURL += `month=${this.dateToFilterStr(this.state.dateFilter)}`;
+    }
+
+    const res = await fetch(apiURL);
     const data = await res.json();
     const albums = data.map((rawAlbum: RawAlbum) => ({
       artist: rawAlbum.artist,
@@ -116,7 +185,10 @@ class App extends React.Component<IProps, IState> {
         <AlbumsContainer
           // Only include albums that are beyond the date filter
           albums={this.state.albums.filter((album) => {
-            return album.releaseDate > this.state.dateFilter;
+            if (this.state.dateFilter) {
+              return album.releaseDate > this.state.dateFilter;
+            }
+            return true;
           })}
           observer={this.state.observer}
           triggerGetAlbumsRef={this.state.triggerGetAlbumsRef}

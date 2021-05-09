@@ -1,7 +1,7 @@
 import React, { ChangeEvent } from "react";
 
 interface FilterBarProps {
-  updateDateFilter: (date: Date) => void;
+  updateDateFilter: (date: Date | undefined) => void;
 }
 
 interface FilterBarState {
@@ -34,12 +34,18 @@ export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
   // React to the month change by sending update to App
   handleDateClick(event: ChangeEvent<HTMLInputElement>) {
     this.setState({ currentDate: event.target.value });
-    this.props.updateDateFilter(new Date(event.target.value));
+    let newDate = new Date(event.target.value);
+    // Adding one because "month" input will return the day prior to the selected month (ex. May 2021 -> 30 April 2021)
+    newDate.setDate(newDate.getDate() + 1);
+    this.props.updateDateFilter(newDate);
   }
 
   // This needs to set initialDate when filters are removed
   handleFilterClick() {
-    this.props.updateDateFilter(new Date(this.state.initialDate));
+    let newDate = new Date(this.state.initialDate);
+    // Adding one because "month" input will return the day prior to the selected month (ex. May 2021 -> 30 April 2021)
+    newDate.setDate(newDate.getDate() + 1);
+    this.props.updateDateFilter(undefined);
     this.setState((prevState) => ({
       currentDate: prevState.initialDate,
     }));
