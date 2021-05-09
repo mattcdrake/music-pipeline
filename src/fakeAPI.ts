@@ -44,13 +44,32 @@ for (let i = 0; i < 5; ++i) {
   }
 }
 
+// HACK: sort albums into buckets by month
+interface MonthMap {
+  [key: string]: Album[];
+}
+
+const albumsByMonth: MonthMap = {};
+for (const album of albums) {
+  // If "YYYY-MM" is already a key in albumsByMonth, then push this album into that array.
+  const monthStr = `${album.releaseDate.getFullYear()}-${
+    album.releaseDate.getMonth() + 1
+  }`;
+  if (monthStr in albumsByMonth) {
+    albumsByMonth[monthStr].push(album);
+  } else {
+    // Otherwise, create a new array with this album as the only element.
+    albumsByMonth[monthStr] = [album];
+  }
+}
+
 const getAlbums = (page: number): Album[] => {
   const start = page * pageSize;
   const end = start + pageSize;
   return albums.slice(start, end);
 };
 
-const getGenres = (genre: string, page: number): Album[] => {
+const getAlbumsByGenre = (genre: string, page: number): Album[] => {
   // Find bucket by looking up index in fakeGenres
   const bucket = fakeGenres.indexOf(genre);
   if (bucket === -1) {
@@ -62,4 +81,16 @@ const getGenres = (genre: string, page: number): Album[] => {
   return albumsByGenre[bucket].slice(start, end);
 };
 
+const getAlbumsByMonth = (monthYr: string, page: number): Album[] => {
+  if (!(monthYr in albumsByMonth)) {
+    return [];
+  }
+
+  const start = page * pageSize;
+  const end = start + pageSize;
+  return albumsByMonth[monthYr].slice(start, end);
+};
+
 exports.getAlbums = getAlbums;
+exports.getAlbumsByGenre = getAlbumsByGenre;
+exports.getAlbumsByMonth = getAlbumsByMonth;
