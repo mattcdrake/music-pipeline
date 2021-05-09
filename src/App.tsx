@@ -1,5 +1,6 @@
 import React from "react";
 import "./App.css";
+import _ from "lodash";
 
 // Components
 import { AlbumsContainer } from "./components/AlbumsContainer";
@@ -30,6 +31,7 @@ class App extends React.Component<IProps, IState> {
     this.getNextPage = this.getNextPage.bind(this);
     this.handleObserver = this.handleObserver.bind(this);
     this.updateDateFilter = this.updateDateFilter.bind(this);
+    this.replaceTrigger = this.replaceTrigger.bind(this);
     this.state = {
       apiURL: config.serverURL,
       page: 0,
@@ -53,32 +55,54 @@ class App extends React.Component<IProps, IState> {
   }
 
   appendAlbums(albums: Album[]) {
-    this.setState((prevState) => ({
-      albums: prevState.albums.concat(albums),
-    }));
+    let newAlbums: Album[] = this.state.albums.concat(albums);
+    newAlbums = _.uniqBy(newAlbums, (album) => `${album.title}${album.artist}`);
+    newAlbums = newAlbums.sort((a: Album, b: Album) => {
+      // Sort albums in ascending order
+      if (a.releaseDate < b.releaseDate) {
+        return -1;
+      } else if (a.releaseDate === b.releaseDate) {
+        return 0;
+      } else {
+        return 1;
+      }
+    });
+    this.setState({ albums: newAlbums });
   }
 
   async getNextPage() {
-    const albums = await this.getAlbums(this.state.page);
+    const albums = await this.getAlbums();
+    if (albums.length === 0) {
+      return;
+    }
     this.appendAlbums(albums);
-    this.setState((prevState) => ({
-      page: prevState.page + 1,
-    }));
+    this.setState(
+      (prevState) => ({
+        page: prevState.page + 1,
+      }),
+      this.replaceTrigger
+    );
   }
 
-  async getAlbums(page: number): Promise<Album[]> {
+  async getAlbums(): Promise<Album[]> {
     const res = await fetch(
-      this.state.apiURL.href + `/albums/${this.state.page}`
+      `${this.state.apiURL.href}/albums/${this.state.page}`
     );
     const data = await res.json();
     const albums = data.map((rawAlbum: RawAlbum) => ({
       artist: rawAlbum.artist,
       title: rawAlbum.title,
+      genre: rawAlbum.genre,
       releaseDate: new Date(rawAlbum.releaseDate),
       coverURL: new URL(rawAlbum.coverURL),
     }));
-
+    console.log(albums);
     return albums;
+  }
+
+  replaceTrigger() {
+    this.state.observer.unobserve(this.state.triggerGetAlbumsRef.current!);
+    this.setState({ triggerGetAlbumsRef: React.createRef() });
   }
 
   render() {

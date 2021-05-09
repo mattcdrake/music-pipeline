@@ -1,6 +1,7 @@
 export interface Album {
   artist: string;
   title: string;
+  genre: string;
   releaseDate: Date;
   coverURL: URL;
 }
@@ -8,6 +9,7 @@ export interface Album {
 export interface RawAlbum {
   artist: string;
   title: string;
+  genre: string;
   releaseDate: string;
   coverURL: string;
 }

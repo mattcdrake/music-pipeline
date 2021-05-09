@@ -34,6 +34,7 @@ export const AlbumCard = (props: AlbumCardProps) => {
           <p className="text-center">
             {props.album.releaseDate.toDateString()}
           </p>
+          <p>{props.album.genre}</p>
         </div>
       </div>
       <img

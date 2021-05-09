@@ -22,6 +22,10 @@ export class AlbumsContainer extends React.Component<
     this.props.observer.observe(this.props.triggerGetAlbumsRef.current!);
   }
 
+  componentDidUpdate() {
+    this.props.observer.observe(this.props.triggerGetAlbumsRef.current!);
+  }
+
   render() {
     return (
       <div className="justify-center overflow-visible mx-auto px-4 flex flex-wrap">
