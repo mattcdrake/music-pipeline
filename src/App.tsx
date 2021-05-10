@@ -26,6 +26,7 @@ interface IState {
   albums: Album[];
   dateFilter: Date | undefined;
   genreFilter: string | undefined;
+  genreList: string[];
   triggerGetAlbumsRef: React.RefObject<HTMLSpanElement>;
   observer: IntersectionObserver;
 }
@@ -50,6 +51,7 @@ class App extends React.Component<IProps, IState> {
       pageCache: pageCache,
       dateFilter: undefined,
       genreFilter: undefined,
+      genreList: [],
       albums: [],
       triggerGetAlbumsRef: React.createRef(),
       observer: new IntersectionObserver(this.handleObserver),
@@ -67,15 +69,32 @@ class App extends React.Component<IProps, IState> {
   }
 
   updateDateFilter(date: Date | undefined) {
-    console.log(date);
     this.setState({
       dateFilter: date,
     });
   }
 
-  updateGenreFilter(genre: string) {
+  updateGenreFilter(genre: string | undefined) {
+    let newFilter: string | undefined = undefined;
+    if (genre) {
+      newFilter = escape(genre);
+    }
+
     this.setState({
-      genreFilter: genre,
+      genreFilter: newFilter,
+    });
+  }
+
+  // Iterate through albums and build a list of represented genres
+  updateGenreList() {
+    let newGenreList: string[] = [];
+    for (const album of this.state.albums) {
+      if (!newGenreList.includes(album.genre)) {
+        newGenreList.push(album.genre);
+      }
+    }
+    this.setState({
+      genreList: newGenreList,
     });
   }
 
@@ -92,7 +111,27 @@ class App extends React.Component<IProps, IState> {
         return 1;
       }
     });
-    this.setState({ albums: newAlbums });
+    this.setState({ albums: newAlbums }, this.updateGenreList);
+  }
+
+  applyFilters(albums: Album[]): Album[] {
+    // Only include albums that are beyond the date filter
+    albums = albums.filter((album) => {
+      if (this.state.dateFilter) {
+        return album.releaseDate > this.state.dateFilter;
+      }
+      return true;
+    });
+
+    // Only include albums that are in the selected genre
+    albums = albums.filter((album) => {
+      if (this.state.genreFilter) {
+        return escape(album.genre) === this.state.genreFilter;
+      }
+      return true;
+    });
+
+    return albums;
   }
 
   async getNextPage() {
@@ -130,7 +169,8 @@ class App extends React.Component<IProps, IState> {
   }
 
   async getAlbums(): Promise<Album[]> {
-    // If there hasn't been a request for this filter yet, save the page/filter in cache
+    // If there hasn't been a request for this filter yet, save the filter with page 0.
+    // Otherwise, find the correct page for a given filter.
     const filterStr = this.getActiveFilterStr();
     let filterPg = 0;
     if (filterStr in this.state.pageCache) {
@@ -145,8 +185,6 @@ class App extends React.Component<IProps, IState> {
     }
 
     let apiURL: string = `${this.state.apiURL.href}/albums/${filterPg}?`;
-
-    // Find the correct page for a given filter
 
     if (this.state.genreFilter) {
       apiURL += `genre=${this.state.genreFilter}&`;
@@ -165,7 +203,6 @@ class App extends React.Component<IProps, IState> {
       releaseDate: new Date(rawAlbum.releaseDate),
       coverURL: new URL(rawAlbum.coverURL),
     }));
-    console.log(albums);
     return albums;
   }
 
@@ -180,16 +217,14 @@ class App extends React.Component<IProps, IState> {
         <Navbar />
         <div className="container mx-auto px-4 pt-8">
           <Header />
-          <FilterBar updateDateFilter={this.updateDateFilter} />
+          <FilterBar
+            updateDateFilter={this.updateDateFilter}
+            updateGenreFilter={this.updateGenreFilter}
+            genreList={this.state.genreList}
+          />
         </div>
         <AlbumsContainer
-          // Only include albums that are beyond the date filter
-          albums={this.state.albums.filter((album) => {
-            if (this.state.dateFilter) {
-              return album.releaseDate > this.state.dateFilter;
-            }
-            return true;
-          })}
+          albums={this.applyFilters(this.state.albums)}
           observer={this.state.observer}
           triggerGetAlbumsRef={this.state.triggerGetAlbumsRef}
         />
