@@ -2,13 +2,9 @@ import { Album } from "./types";
 
 const pageSize = 20;
 
-const helpers = require("./buildAlbums");
-helpers.getAlbumsFromWiki(
-  "https://en.wikipedia.org/wiki/List_of_2021_albums",
-  processAlbumsObjRaw
-);
+const helpers = require("./setupModule");
 
-function processAlbumsObjRaw(albumsRaw: any) {
+const processAlbumsObjRaw = (albumsRaw: any) => {
   // Process arrays of raw objects from scraper into albums
   const albums2d: Album[][] = Object.keys(albumsRaw).map((key) => {
     if (key === "bad_tables") {
@@ -23,7 +19,7 @@ function processAlbumsObjRaw(albumsRaw: any) {
   }
 
   setAlbums(albumsFull);
-}
+};
 
 // Store Albums by genre/date
 interface GenreMap {
@@ -39,7 +35,7 @@ let albums: Album[] = [];
 const albumsByGenre: GenreMap = {};
 const albumsByMonth: MonthMap = {};
 
-function setAlbums(albumsNew: Album[]) {
+const setAlbums = (albumsNew: Album[]) => {
   albums = albumsNew;
 
   // Are albums guaranteed to be processed at this point?
@@ -75,7 +71,7 @@ function setAlbums(albumsNew: Album[]) {
       albumsByMonth[monthStr] = [album];
     }
   }
-}
+};
 
 const getAlbums = (page: number): Album[] => {
   const start = page * pageSize;
@@ -106,3 +102,4 @@ const getAlbumsByMonth = (monthYr: string, page: number): Album[] => {
 exports.getAlbums = getAlbums;
 exports.getAlbumsByGenre = getAlbumsByGenre;
 exports.getAlbumsByMonth = getAlbumsByMonth;
+exports.processAlbumsObjRaw = processAlbumsObjRaw;

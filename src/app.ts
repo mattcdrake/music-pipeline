@@ -18,8 +18,11 @@ app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-// Build album data
-require("./buildAlbums");
+// Build album data on setup run
+if (process.argv.includes("--setupModule")) {
+  const setup = require("./setupModule");
+  setup.initialSetup(false);
+}
 
 app.get("/api/albums/:pageNum", async (req, res) => {
   let albums;

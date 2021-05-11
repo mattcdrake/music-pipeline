@@ -1,5 +1,10 @@
+// Dependencies
 const http = require("http");
 const faker = require("faker");
+const albumQueries = require("./albumQueries");
+const fakeAPI = require("./fakeAPI");
+
+// Types
 import { Album } from "./types";
 
 const getAlbumsFromWiki = (url: string, callback: (arg: any) => void): any => {
@@ -46,26 +51,32 @@ const getAlbumsFromWiki = (url: string, callback: (arg: any) => void): any => {
   req.end();
 };
 
+/**
+ * Takes an array of objects and converts them into an array of albums.
+ * This is called after getting the table JSON from the wikitable service.
+ *
+ * @param {any} obj Array of raw album data
+ * @returns Album[]
+ */
 const albumObjToArray = (obj: any): Album[] => {
   const albums: Album[] = [];
 
   // Unscheduled albums appear like this. Those shouldn't be processed.
-  if (obj["0"]["0"] !== "Release date") {
+  if (obj[0][0] !== "Release date") {
     return albums;
   }
 
   let i = 1;
   while (true) {
-    const index = `${i}`;
     // Check to see if there is another row. If not, this will be undefined.
-    if (!obj["0"][index]) {
+    if (!obj[i]) {
       break;
     }
     albums.push({
-      artist: obj["1"][index],
-      title: obj["2"][index],
-      genre: obj["3"][index],
-      releaseDate: new Date(`${obj["0"][index]}, 2021`),
+      artist: obj[i][1],
+      title: obj[i][2],
+      genre: obj[i][3],
+      releaseDate: new Date(`${obj[i][0]}, 2021`),
       coverURL: new URL(faker.image.image(200, 200)),
     });
     i++;
@@ -74,5 +85,26 @@ const albumObjToArray = (obj: any): Album[] => {
   return albums;
 };
 
-exports.getAlbumsFromWiki = getAlbumsFromWiki;
+/**
+ * Runs the initial setup process.
+ *
+ * @param {boolean} useDB Indicates whether processed albums are stored in memory or a database.
+ */
+const initialSetup = (useDB: boolean = true) => {
+  if (!useDB) {
+    tempSetup();
+  }
+};
+
+/**
+ * Runs the temporary setup that stores albums in memory instead of a db.
+ */
+const tempSetup = () => {
+  getAlbumsFromWiki(
+    "https://en.wikipedia.org/wiki/List_of_2021_albums",
+    fakeAPI.processAlbumsObjRaw
+  );
+};
+
 exports.albumObjToArray = albumObjToArray;
+exports.initialSetup = initialSetup;
