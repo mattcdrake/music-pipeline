@@ -7,12 +7,24 @@ const fakeAPI = require("./fakeAPI");
 // Types
 import { Album } from "./types";
 
+/**
+ * Sends a request to table-scraping service asking for tables at url. Used to
+ * parse Wikipedia tables.
+ *
+ * JSON returned from table-scraper is passed into the "callback" function
+ * provided as an argument.
+ *
+ * @param {string} url The page to pull tables from.
+ * @param {callback} function The function that will be called with returned JSON.
+ */
 const getAlbumsFromWiki = (url: string, callback: (arg: any) => void): any => {
+  // Parameters for table-scraping API
   const getData = JSON.stringify({
     url,
     skiprows: 1,
   });
 
+  // Request options
   const options = {
     hostname: "127.0.0.1",
     port: 5000,
@@ -24,14 +36,19 @@ const getAlbumsFromWiki = (url: string, callback: (arg: any) => void): any => {
     },
   };
 
+  // Make request and parse response
   const req = http.request(options, (res: any) => {
     console.log(`STATUS: ${res.statusCode}`);
     console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
     res.setEncoding("utf8");
     let rawData = "";
+
+    // Build JSON response
     res.on("data", (chunk: any) => {
       rawData += chunk;
     });
+
+    // Parse JSON and pass it to the callback function.
     res.on("end", () => {
       try {
         const parsedData = JSON.parse(rawData);
@@ -42,6 +59,7 @@ const getAlbumsFromWiki = (url: string, callback: (arg: any) => void): any => {
     });
   });
 
+  // Bad request
   req.on("error", (e: any) => {
     console.error(`problem with request: ${e.message}`);
   });
@@ -66,6 +84,7 @@ const albumObjToArray = (obj: any): Album[] => {
     return albums;
   }
 
+  // Start at 1 to pass over column titles.
   let i = 1;
   while (true) {
     // Check to see if there is another row. If not, this will be undefined.

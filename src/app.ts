@@ -24,6 +24,7 @@ if (process.argv.includes("--setupModule")) {
   setup.initialSetup(false);
 }
 
+// Route for reading album data
 app.get("/api/albums/:pageNum", async (req, res) => {
   let albums;
   if (req.query.genre) {
