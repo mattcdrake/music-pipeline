@@ -1,3 +1,4 @@
+// Dependencies
 import React from "react";
 
 // Components
@@ -8,8 +9,8 @@ import { Album } from "../types";
 
 interface AlbumsContainerProps {
   albums: Album[];
-  observer: IntersectionObserver;
-  triggerGetAlbumsRef: React.RefObject<HTMLSpanElement>;
+  observer: IntersectionObserver; // Observes trigger to initiate infinite scroll
+  triggerGetAlbumsRef: React.RefObject<HTMLSpanElement>; // Used as infinite scroll trigger
 }
 
 interface AlbumsContainerState {}
