@@ -1,3 +1,4 @@
+// Dependencies
 import React from "react";
 import "./App.css";
 import _ from "lodash";
@@ -22,7 +23,7 @@ interface IProps {}
 
 interface IState {
   apiURL: URL;
-  pageCache: IPageCache;
+  pageCache: IPageCache; // Used to efficiently request new albums with infinite scroll + filters
   albums: Album[];
   dateFilter: Date | undefined;
   genreFilter: string | undefined;
@@ -58,46 +59,12 @@ class App extends React.Component<IProps, IState> {
     };
   }
 
-  dateToFilterStr(date: Date): string {
-    return `${date.getFullYear()}-${date.getMonth() + 1}`;
-  }
-
-  handleObserver(entries: IntersectionObserverEntry[]) {
-    if (entries[0].isIntersecting) {
-      this.getNextPage();
-    }
-  }
-
-  updateDateFilter(date: Date | undefined) {
-    this.setState({
-      dateFilter: date,
-    });
-  }
-
-  updateGenreFilter(genre: string | undefined) {
-    let newFilter: string | undefined = undefined;
-    if (genre) {
-      newFilter = escape(genre);
-    }
-
-    this.setState({
-      genreFilter: newFilter,
-    });
-  }
-
-  // Iterate through albums and build a list of represented genres
-  updateGenreList() {
-    let newGenreList: string[] = [];
-    for (const album of this.state.albums) {
-      if (!newGenreList.includes(album.genre)) {
-        newGenreList.push(album.genre);
-      }
-    }
-    this.setState({
-      genreList: newGenreList,
-    });
-  }
-
+  /**
+   * Takes an array of albums and merges them into the array of albums in state.
+   * Removes duplicates and sorts them in ascending order by time.
+   *
+   * @param {Album[]} albums The array of albums to add to state.
+   */
   appendAlbums(albums: Album[]) {
     let newAlbums: Album[] = this.state.albums.concat(albums);
     newAlbums = _.uniqBy(newAlbums, (album) => `${album.title}${album.artist}`);
@@ -114,6 +81,12 @@ class App extends React.Component<IProps, IState> {
     this.setState({ albums: newAlbums }, this.updateGenreList);
   }
 
+  /**
+   * Applies active date & genre filters to an album array.
+   *
+   * @param {Album[]} albums The album array to filter
+   * @returns {Album[]} The filtered array
+   */
   applyFilters(albums: Album[]): Album[] {
     // Only include albums that are beyond the date filter
     albums = albums.filter((album) => {
@@ -134,6 +107,21 @@ class App extends React.Component<IProps, IState> {
     return albums;
   }
 
+  /**
+   * Takes a date and returns a string that matches the date filter format "YYYY-MM".
+   * This format is based on the "month" input element.
+   *
+   * @param {Date} date
+   * @returns {string}
+   */
+  dateToFilterStr(date: Date): string {
+    return `${date.getFullYear()}-${date.getMonth() + 1}`;
+  }
+
+  /**
+   * Gets the next page from the API based on what the active filters are. Then records
+   * the requested page in pageCache.
+   */
   async getNextPage() {
     const albums = await this.getAlbums();
     if (albums.length === 0) {
@@ -154,7 +142,11 @@ class App extends React.Component<IProps, IState> {
     );
   }
 
-  // Creates a string of active filters. For use in getting albums and caching page numbers.
+  /**
+   * Creates a string of active filters. For use in getting albums and caching page numbers.
+   *
+   * @returns {string} Active filters
+   */
   getActiveFilterStr(): string {
     let filterStr = "";
     if (this.state.dateFilter) {
@@ -168,6 +160,11 @@ class App extends React.Component<IProps, IState> {
     return filterStr;
   }
 
+  /**
+   * Gets the next page of albums from the API, based on active filters.
+   *
+   * @returns {Promise<Album[]>}
+   */
   async getAlbums(): Promise<Album[]> {
     // If there hasn't been a request for this filter yet, save the filter with page 0.
     // Otherwise, find the correct page for a given filter.
@@ -191,7 +188,7 @@ class App extends React.Component<IProps, IState> {
     }
 
     if (this.state.dateFilter) {
-      apiURL += `month=${this.dateToFilterStr(this.state.dateFilter)}`;
+      apiURL += `month=${this.dateToFilterStr(this.state.dateFilter)}&`;
     }
 
     const res = await fetch(apiURL);
@@ -206,6 +203,63 @@ class App extends React.Component<IProps, IState> {
     return albums;
   }
 
+  /**
+   * Gets next page whenever the observed element is on the page. Enables infinite scrolling.
+   *
+   * @param {IntersectionObserverEntry[]} entries Contains event info
+   */
+  handleObserver(entries: IntersectionObserverEntry[]) {
+    if (entries[0].isIntersecting) {
+      this.getNextPage();
+    }
+  }
+
+  /**
+   * Setter for active date filter.
+   *
+   * @param {Date | undefined} date
+   */
+  updateDateFilter(date: Date | undefined) {
+    this.setState({
+      dateFilter: date,
+    });
+  }
+
+  /**
+   * Setter for active genre filter.
+   *
+   * @param {string | undefined} genre
+   */
+  updateGenreFilter(genre: string | undefined) {
+    let newFilter: string | undefined = undefined;
+    if (genre) {
+      newFilter = escape(genre);
+    }
+
+    this.setState({
+      genreFilter: newFilter,
+    });
+  }
+
+  /**
+   * Iterate through albums and build a list of represented genres
+   */
+  updateGenreList() {
+    let newGenreList: string[] = [];
+    for (const album of this.state.albums) {
+      if (!newGenreList.includes(album.genre)) {
+        newGenreList.push(album.genre);
+      }
+    }
+    this.setState({
+      genreList: newGenreList,
+    });
+  }
+
+  /**
+   * Refreshes infinite scroll trigger reference and removes the old one
+   * from observer.
+   */
   replaceTrigger() {
     this.state.observer.unobserve(this.state.triggerGetAlbumsRef.current!);
     this.setState({ triggerGetAlbumsRef: React.createRef() });

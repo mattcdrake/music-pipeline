@@ -17,10 +17,10 @@ interface AlbumCardState {
 export class AlbumCard extends React.Component<AlbumCardProps, AlbumCardState> {
   constructor(props: AlbumCardProps) {
     super(props);
-    this.setState({
+    this.state = {
       max_title_len: 40,
       max_artist_len: 20,
-    });
+    };
   }
 
   render() {

@@ -1,36 +1,39 @@
+// Dependencies
 import React, { ChangeEvent } from "react";
 
 interface FilterBarProps {
-  updateDateFilter: (date: Date | undefined) => void;
-  updateGenreFilter: (genre: string | undefined) => void;
-  genreList: string[];
+  updateDateFilter: (date: Date | undefined) => void; // Updates parent component about active filters
+  updateGenreFilter: (genre: string | undefined) => void; // Updates parent component about active filters
+  genreList: string[]; // List of genres to show as available genre filters
 }
 
 interface FilterBarState {
-  currentDate: string;
-  initialDate: string;
+  currentDate: string; // The current date in the date filter, represented as "YYYY-MM" based on the month input element.
+  initialDate: string; // The initial date in the date filter, represented as "YYYY-MM" based on the month input element.
 }
 
 export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
   constructor(props: FilterBarProps) {
     super(props);
     this.handleDateClick = this.handleDateClick.bind(this);
-    this.handleFilterClick = this.handleFilterClick.bind(this);
+    this.handleDateFilterXClick = this.handleDateFilterXClick.bind(this);
     this.handleGenreClick = this.handleGenreClick.bind(this);
 
-    let newDate = new Date();
-    newDate.setDate(newDate.getDate() + 1);
-    this.props.updateDateFilter(newDate);
+    // Creates an initial date filter so only albums in the future are shown.
+    this.props.updateDateFilter(new Date());
 
     const inputDateStr = this.dateToInputStr();
     this.state = {
       currentDate: inputDateStr,
-      initialDate: inputDateStr, // Used to determine when a filter is applied
+      initialDate: inputDateStr,
     };
   }
 
-  // Stores the inital value of the "month" filter selector.
-  // I am creating this string to compare against the filter in the future.
+  /**
+   * Creates a string that adheres to the "month" input element format.
+   *
+   * @returns {string}
+   */
   dateToInputStr(): string {
     let date = new Date();
     const monthStr =
@@ -38,7 +41,12 @@ export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
     return `${date.getFullYear()}-${monthStr}`;
   }
 
-  // React to the month change by sending update to App
+  /**
+   * Called when the user updates the date filter. It will notify the parent
+   * component and update internal state.
+   *
+   * @param {ChangeEvent<HTMLInputElement>} event Contains new date value
+   */
   handleDateClick(event: ChangeEvent<HTMLInputElement>) {
     this.setState({ currentDate: event.target.value });
     let newDate = new Date(event.target.value);
@@ -47,17 +55,23 @@ export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
     this.props.updateDateFilter(newDate);
   }
 
-  // This needs to set initialDate when filters are removed
-  handleFilterClick() {
+  /**
+   * Removes active date filters when the user clicks the 'X'.
+   */
+  handleDateFilterXClick() {
     let newDate = new Date(this.state.initialDate);
-    // Adding one because "month" input will return the day prior to the selected month (ex. May 2021 -> 30 April 2021)
     newDate.setDate(newDate.getDate() + 1);
-    this.props.updateDateFilter(newDate);
     this.setState((prevState) => ({
       currentDate: prevState.initialDate,
     }));
+    this.props.updateDateFilter(newDate);
   }
 
+  /**
+   * Called when the user selects a genre filter.
+   *
+   * @param {ChangeEvent<HTMLSelectElement>} event Contains new date value
+   */
   handleGenreClick(event: ChangeEvent<HTMLSelectElement>) {
     let newGenreFilter = undefined;
     // "None" should reset App's genre filter, represented by an undefined filter.
@@ -71,7 +85,10 @@ export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
     let removeDateFilter;
     if (this.state.currentDate !== this.state.initialDate) {
       removeDateFilter = (
-        <span onClick={this.handleFilterClick} className="ml-4 cursor-pointer">
+        <span
+          onClick={this.handleDateFilterXClick}
+          className="ml-4 cursor-pointer"
+        >
           &#x274C;
         </span>
       );
