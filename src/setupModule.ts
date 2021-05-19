@@ -26,10 +26,9 @@ const getAlbumsFromWiki = (url: string, callback: (arg: any) => void): any => {
 
   // Request options
   const options = {
-    hostname: "127.0.0.1",
-    port: 5000,
+    hostname: "python-build-app.ue.r.appspot.com",
     path: "/",
-    method: "GET",
+    method: "POST",
     headers: {
       "Content-Type": "application/json",
       "Content-Length": Buffer.byteLength(getData),
