@@ -1,7 +1,6 @@
 // Dependencies
 const http = require("http");
 const faker = require("faker");
-const albumQueries = require("./albumQueries");
 const fakeAPI = require("./fakeAPI");
 
 // Types
@@ -87,7 +86,7 @@ const albumObjToArray = (obj: any): Album[] => {
   let i = 1;
   while (true) {
     // Check to see if there is another row. If not, this will be undefined.
-    if (!obj[i]) {
+    if (typeof obj[i] === "undefined") {
       break;
     }
     albums.push({
