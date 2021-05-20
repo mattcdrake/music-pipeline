@@ -6,9 +6,10 @@ import { Datastore } from "@google-cloud/datastore";
 // App data
 const PORT = process.env.PORT || 8080;
 const app = express();
-app.enable("trust proxy");
+const DEFAULT_PAGE_SIZE = 30;
 
 // Middleware
+app.enable("trust proxy");
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -22,29 +23,29 @@ if (process.argv.includes("--setupModule")) {
   setup.initialSetup();
 }
 
-/*
 // Route for reading album data
-app.get("/api/albums/:pageNum", (req, res) => {
-  let albums;
+app.get("/api/albums/", async (req, res) => {
+  const query = datastore.createQuery("album").limit(DEFAULT_PAGE_SIZE);
+
   if (req.query.genre) {
-    // User has specified a genre
-    albums = getAlbumsByGenre(
-      req.query.genre.toString(),
-      parseInt(req.params.pageNum, 10)
-    );
-  } else if (req.query.month) {
-    // User has specified a month
-    albums = getAlbumsByMonth(
-      req.query.month.toString(),
-      parseInt(req.params.pageNum, 10)
-    );
-  } else {
-    // No filters
-    albums = getAlbums(parseInt(req.params.pageNum, 10));
+    query.filter("genre", "=", req.query.genre.toString());
   }
+
+  if (req.query.date) {
+    query.filter("releaseDate", ">=", new Date(req.query.date.toString()));
+  }
+
+  if (req.query.p) {
+    const page = parseInt(req.query.p.toString(), 10);
+    query.offset(page * DEFAULT_PAGE_SIZE);
+  }
+
+  const albums = await datastore
+    .runQuery(query)
+    .then((entities) => entities[0]);
+
   res.status(200).json(albums);
 });
-*/
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);

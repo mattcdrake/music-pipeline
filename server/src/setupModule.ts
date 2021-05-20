@@ -140,7 +140,7 @@ const saveAlbums = (albums: Album[]) => {
  * @param {Album} album
  */
 const saveAlbum = (album: Album) => {
-  let entity = {
+  const entity = {
     key: datastore.key("album"),
     data: {
       artist: album.artist,
