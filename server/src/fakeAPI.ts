@@ -73,13 +73,13 @@ const setAlbums = (albumsNew: Album[]) => {
   }
 };
 
-const getAlbums = (page: number): Album[] => {
+export const getAlbums = (page: number): Album[] => {
   const start = page * pageSize;
   const end = start + pageSize;
   return albums.slice(start, end);
 };
 
-const getAlbumsByGenre = (genre: string, page: number): Album[] => {
+export const getAlbumsByGenre = (genre: string, page: number): Album[] => {
   if (!(genre in albumsByGenre)) {
     return [];
   }
@@ -89,7 +89,7 @@ const getAlbumsByGenre = (genre: string, page: number): Album[] => {
   return albumsByGenre[genre].slice(start, end);
 };
 
-const getAlbumsByMonth = (monthYr: string, page: number): Album[] => {
+export const getAlbumsByMonth = (monthYr: string, page: number): Album[] => {
   if (!(monthYr in albumsByMonth)) {
     return [];
   }
@@ -99,7 +99,4 @@ const getAlbumsByMonth = (monthYr: string, page: number): Album[] => {
   return albumsByMonth[monthYr].slice(start, end);
 };
 
-exports.getAlbums = getAlbums;
-exports.getAlbumsByGenre = getAlbumsByGenre;
-exports.getAlbumsByMonth = getAlbumsByMonth;
 exports.processAlbumsObjRaw = processAlbumsObjRaw;
