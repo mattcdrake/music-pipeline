@@ -1,7 +1,7 @@
 // Dependencies
-const http = require("http");
-const faker = require("faker");
-const fakeAPI = require("./fakeAPI");
+import http from "http";
+import faker from "faker";
+import { datastore } from "./app";
 
 // Types
 import { Album } from "./types";
@@ -16,7 +16,7 @@ import { Album } from "./types";
  * @param {string} url The page to pull tables from.
  * @param {callback} function The function that will be called with returned JSON.
  */
-const getAlbumsFromWiki = (url: string, callback: (arg: any) => void): any => {
+const getAlbumsFromWiki = (url: string) => {
   // Parameters for table-scraping API
   const getData = JSON.stringify({
     url,
@@ -50,7 +50,7 @@ const getAlbumsFromWiki = (url: string, callback: (arg: any) => void): any => {
     res.on("end", () => {
       try {
         const parsedData = JSON.parse(rawData);
-        callback(parsedData);
+        processAlbumsObjRaw(parsedData);
       } catch (e) {
         console.error(e.message);
       }
@@ -94,7 +94,7 @@ const albumObjToArray = (obj: any): Album[] => {
       title: obj[i][2],
       genre: obj[i][3],
       releaseDate: new Date(`${obj[i][0]}, 2021`),
-      coverURL: new URL(faker.image.image(200, 200)),
+      coverURL: new URL(faker.image.imageUrl(200, 200, "abstract")),
     });
     i++;
   }
@@ -103,25 +103,63 @@ const albumObjToArray = (obj: any): Album[] => {
 };
 
 /**
+ * Converts a 2d array of raw album data into a 1d array of albums.
+ *
+ * @param {any} albumsRaw 2d array
+ * @returns Album[]
+ */
+const processAlbumsObjRaw = (albumsRaw: any) => {
+  // Process arrays of raw objects from scraper into albums
+  const albums2d: Album[][] = Object.keys(albumsRaw).map((key) => {
+    if (key === "bad_tables") {
+      return [];
+    }
+    return albumObjToArray(albumsRaw[key]);
+  });
+  let albumsFull: Album[] = [];
+
+  for (const albumsTemp of albums2d) {
+    albumsFull = albumsFull.concat(albumsTemp);
+  }
+
+  saveAlbums(albumsFull);
+};
+
+/**
+ * Takes an Album[] and saves each album to datastore.
+ *
+ * @param {Album[]} albums to save
+ */
+const saveAlbums = (albums: Album[]) => {
+  albums.forEach((album) => saveAlbum(album));
+};
+
+/**
+ * Saves a single album to datastore.
+ *
+ * @param {Album} album
+ */
+const saveAlbum = (album: Album) => {
+  let entity = {
+    key: datastore.key("album"),
+    data: {
+      artist: album.artist,
+      title: album.title,
+      genre: album.genre,
+      releaseDate: album.releaseDate,
+      coverURL: album.coverURL.toString(),
+    },
+  };
+  datastore.save(entity);
+};
+
+/**
  * Runs the initial setup process.
  *
  * @param {boolean} useDB Indicates whether processed albums are stored in memory or a database.
  */
-const initialSetup = (useDB: boolean = true) => {
-  if (!useDB) {
-    tempSetup();
-  }
+const initialSetup = () => {
+  getAlbumsFromWiki("https://en.wikipedia.org/wiki/List_of_2021_albums");
 };
 
-/**
- * Runs the temporary setup that stores albums in memory instead of a db.
- */
-const tempSetup = () => {
-  getAlbumsFromWiki(
-    "https://en.wikipedia.org/wiki/List_of_2021_albums",
-    fakeAPI.processAlbumsObjRaw
-  );
-};
-
-exports.albumObjToArray = albumObjToArray;
 exports.initialSetup = initialSetup;
