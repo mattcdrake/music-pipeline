@@ -1,0 +1,16 @@
+indexes:
+
+- kind: album
+  properties:
+      - name: genre
+      - name: releaseDate
+        direction: asc
+      - name: artist
+      - name: title
+      - name: coverURL
+
+- kind: album
+  properties:
+      - name: genre
+      - name: releaseDate
+        direction: asc
