@@ -181,15 +181,20 @@ class App extends React.Component<IProps, IState> {
       });
     }
 
-    let apiURL: string = `${this.state.apiURL.href}/albums/${filterPg}?`;
+    let apiURL: string = `${this.state.apiURL.href}/albums?`;
 
+    // Append genre query param
     if (this.state.genreFilter) {
       apiURL += `genre=${this.state.genreFilter}&`;
     }
 
+    // Append date query param
     if (this.state.dateFilter) {
-      apiURL += `month=${this.dateToFilterStr(this.state.dateFilter)}&`;
+      apiURL += `date=${this.state.dateFilter.toISOString()}&`;
     }
+
+    // Append page query param
+    apiURL += `p=${filterPg}&`;
 
     const res = await fetch(apiURL);
     const data = await res.json();
