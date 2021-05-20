@@ -23,7 +23,6 @@ if (process.argv.includes("--setupModule")) {
   setup.initialSetup();
 }
 
-/*
 // Route for reading album data
 app.get("/api/albums/", async (req, res) => {
   const query = datastore.createQuery("album").limit(DEFAULT_PAGE_SIZE);
@@ -47,7 +46,6 @@ app.get("/api/albums/", async (req, res) => {
 
   res.status(200).json(albums);
 });
-*/
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
