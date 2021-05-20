@@ -1,7 +1,7 @@
 // Dependencies
 import cors from "cors";
 import express from "express";
-import { getAlbumsByMonth, getAlbumsByGenre, getAlbums } from "./fakeAPI";
+import { Datastore } from "@google-cloud/datastore";
 
 // App data
 const PORT = process.env.PORT || 8080;
@@ -13,12 +13,16 @@ app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
+// Datastore
+export const datastore = new Datastore();
+
 // Build album data on setup run
 if (process.argv.includes("--setupModule")) {
   const setup = require("./setupModule");
-  setup.initialSetup(false);
+  setup.initialSetup();
 }
 
+/*
 // Route for reading album data
 app.get("/api/albums/:pageNum", (req, res) => {
   let albums;
@@ -40,6 +44,7 @@ app.get("/api/albums/:pageNum", (req, res) => {
   }
   res.status(200).json(albums);
 });
+*/
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
