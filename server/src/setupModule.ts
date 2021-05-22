@@ -1,4 +1,5 @@
 // Dependencies
+import fs from "fs";
 import http from "http";
 import faker from "faker";
 import { datastore } from "./app";
@@ -78,27 +79,19 @@ const albumObjToArray = (obj: any): Album[] => {
   const albums: Album[] = [];
 
   // Unscheduled albums appear like this. Those shouldn't be processed.
-  if (obj[0][0] !== "Release date") {
+  if (typeof obj[0]["Release date"] === "undefined") {
     return albums;
   }
 
-  // Start at 1 to pass over column titles.
-  let i = 1;
-  while (true) {
-    // Check to see if there is another row. If not, this will be undefined.
-    if (typeof obj[i] === "undefined") {
-      break;
-    }
+  for (const album of obj) {
     albums.push({
-      artist: obj[i][1],
-      title: obj[i][2],
-      genre: obj[i][3],
-      releaseDate: new Date(`${obj[i][0]}, 2021`),
-      coverURL: new URL(faker.image.imageUrl(200, 200, "abstract")),
+      artist: album["Artist"],
+      title: album["Album"],
+      genre: album["Genre"],
+      releaseDate: new Date(`${album["Release date"]}, 2021`),
+      coverURL: album["images"],
     });
-    i++;
   }
-
   return albums;
 };
 
@@ -159,7 +152,9 @@ const saveAlbum = (album: Album) => {
  * @param {boolean} useDB Indicates whether processed albums are stored in memory or a database.
  */
 const initialSetup = () => {
-  getAlbumsFromWiki("https://en.wikipedia.org/wiki/List_of_2021_albums");
+  //getAlbumsFromWiki("https://en.wikipedia.org/wiki/List_of_2021_albums");
+  const data = JSON.parse(fs.readFileSync("dist/data.json", "utf8"));
+  processAlbumsObjRaw(data);
 };
 
 exports.initialSetup = initialSetup;
