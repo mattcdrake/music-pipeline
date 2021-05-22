@@ -1,7 +1,9 @@
 from bs4 import BeautifulSoup
-from urllib import request as urlreq
+from urllib import request as urlreq, parse
 from pandas import pandas as pd
 import json
+import time
+import requests
 
 
 def get_primary_link(row):
@@ -37,7 +39,11 @@ def scrape_wiki(url="https://en.wikipedia.org/wiki/List_of_2021_albums", skiprow
     page_soup = BeautifulSoup(page, "html.parser")
     tables = page_soup.find_all("table", class_="wikitable")
     tables_dict = convert_wiki_tables(tables, skiprows)
-    return json.dumps(tables_dict)
+
+    with open("data.json", "w") as json_file:
+        json.dump(tables_dict, json_file)
+
+    # return json.dumps(tables_dict)
 
 
 def convert_wiki_tables(tables, skiprows: int):
@@ -53,13 +59,26 @@ def convert_wiki_tables(tables, skiprows: int):
     dict_tables = {"bad_tables": 0}
 
     for i, table in enumerate(tables):
-    #try:
-        links = [get_primary_link(row) for row in table.find_all('tr')]
-        print(links)
-        table_df = pd.read_html(str(table), header=0, flavor="bs4", skiprows=skiprows)[0]
-        dict_tables[i] = table_df.where((pd.notnull(table_df)), None).to_dict("records")
-    #except:
-        dict_tables["bad_tables"] = dict_tables.get("bad_tables", 0) + 1
+
+        try:
+            table_df = pd.read_html(str(table), header=0, flavor="bs4", skiprows=skiprows)[0]
+            links = ["https://en.wikipedia.org{}".format(get_primary_link(row)) for row in table.find_all('tr')]
+            images = []
+
+            for link in links[2:]:
+                req =  requests.post("http://flip3.engr.oregonstate.edu:35351/api/image-scraper", json={"wikiURL": link})
+                data = req.json()
+                img = "https://{}".format(data['imageURL'][2:])
+                images.append(img)
+                print(img)
+                time.sleep(1)
+
+            table_df['links'] = links[2:]
+            table_df['images'] = images
+
+            dict_tables[i] = table_df.where((pd.notnull(table_df)), None).to_dict("records")
+        except:
+            dict_tables["bad_tables"] = dict_tables.get("bad_tables", 0) + 1
 
     return dict_tables
 
