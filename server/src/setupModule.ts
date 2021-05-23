@@ -1,7 +1,6 @@
 // Dependencies
 import fs from "fs";
 import http from "http";
-import faker from "faker";
 import { datastore } from "./app";
 
 // Types
