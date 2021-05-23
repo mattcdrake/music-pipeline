@@ -24,6 +24,14 @@ export class AlbumCard extends React.Component<AlbumCardProps, AlbumCardState> {
   }
 
   render() {
+    let imgSrc;
+    if (typeof this.props.album.coverURL.href === "undefined") {
+      imgSrc =
+        "https://i.pinimg.com/originals/80/64/d4/8064d4b02c4628853868adcc091c8fc1.png";
+    } else {
+      imgSrc = this.props.album.coverURL.href;
+    }
+
     return (
       <div className="border border-gray-300 hover:border-pink-600 cursor-pointer shadow-2xl rounded-lg m-4 py-4 w-60 h-84 bg-gray-200 relative flex">
         <div className="flex mx-auto px-2 h-36">
@@ -45,8 +53,8 @@ export class AlbumCard extends React.Component<AlbumCardProps, AlbumCardState> {
         </div>
         <img
           alt="album cover"
-          className="block mx-auto w-2/3 absolute bottom-4 left-0 right-0"
-          src={this.props.album.coverURL.href}
+          className="block mx-auto w-40 h-40 absolute bottom-4 left-0 right-0"
+          src={imgSrc}
         />
       </div>
     );

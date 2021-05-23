@@ -6,6 +6,21 @@ import { datastore } from "./app";
 // Types
 import { Album } from "./types";
 
+// Bad album images
+const badAlbumURLs = [
+  "https://upload.wikimedia.org/wikipedia/en/thumb/6/6c/Wiki_letter_w.svg/40px-Wiki_letter_w.svg.png",
+  "https://upload.wikimedia.org/wikipedia/en/thumb/9/99/Question_book-new.svg/50px-Question_book-new.svg.png",
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Text_document_with_red_question_mark.svg/40px-Text_document_with_red_question_mark.svg.png",
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Ambox_current_red_Asia_Australia.svg/42px-Ambox_current_red_Asia_Australia.svg.png",
+  "https://upload.wikimedia.org/wikipedia/en/thumb/8/8a/OOjs_UI_icon_edit-ltr-progressive.svg/10px-OOjs_UI_icon_edit-ltr-progressive.svg.png",
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Gnome-dev-cdrom-audio.svg/32px-Gnome-dev-cdrom-audio.svg.png",
+  "https://upload.wikimedia.org/wikipedia/en/thumb/b/b4/Ambox_important.svg/40px-Ambox_important.svg.png",
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Musical_notes.svg/30px-Musical_notes.svg.png",
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Unbalanced_scales.svg/45px-Unbalanced_scales.svg.png",
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Wiktionary-logo-en-v2.svg/40px-Wiktionary-logo-en-v2.svg.png",
+  "https://en.wikipedia.org/wiki/Special:CentralAutoLogin/start?type=1x1",
+];
+
 /**
  * Sends a request to table-scraping service asking for tables at url. Used to
  * parse Wikipedia tables.
@@ -83,12 +98,14 @@ const albumObjToArray = (obj: any): Album[] => {
   }
 
   for (const album of obj) {
+    const albumImage = badAlbumURLs.includes(album.images) ? "" : album.images;
+
     albums.push({
-      artist: album["Artist"],
-      title: album["Album"],
-      genre: album["Genre"],
+      artist: album.Artist,
+      title: album.Album,
+      genre: album.Genre,
       releaseDate: new Date(`${album["Release date"]}, 2021`),
-      coverURL: album["images"],
+      coverURL: albumImage,
     });
   }
   return albums;
@@ -151,7 +168,7 @@ const saveAlbum = (album: Album) => {
  * @param {boolean} useDB Indicates whether processed albums are stored in memory or a database.
  */
 const initialSetup = () => {
-  //getAlbumsFromWiki("https://en.wikipedia.org/wiki/List_of_2021_albums");
+  // getAlbumsFromWiki("https://en.wikipedia.org/wiki/List_of_2021_albums");
   const data = JSON.parse(fs.readFileSync("dist/data.json", "utf8"));
   processAlbumsObjRaw(data);
 };

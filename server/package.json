@@ -8,7 +8,7 @@
     "build": "tsc",
     "prestart": "npm run build",
     "start": "tsc & nodemon app.js",
-    "start-init": "tsc & nodemon app.js --setupModule",
+    "start-init": "tsc & node app.js --setupModule",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Matt Drake",

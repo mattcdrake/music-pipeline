@@ -203,7 +203,7 @@ class App extends React.Component<IProps, IState> {
       title: rawAlbum.title,
       genre: rawAlbum.genre,
       releaseDate: new Date(rawAlbum.releaseDate),
-      coverURL: new URL(rawAlbum.coverURL),
+      coverURL: rawAlbum.coverURL === "" ? "" : new URL(rawAlbum.coverURL),
     }));
     return albums;
   }
