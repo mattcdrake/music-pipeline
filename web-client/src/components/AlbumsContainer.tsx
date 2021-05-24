@@ -28,11 +28,18 @@ export class AlbumsContainer extends React.Component<
   }
 
   render() {
+    let emptyMessage;
+    if (this.props.albums.length === 0) {
+      emptyMessage = <p className="text-5xl my-20">No albums to display :(</p>;
+    }
+
     return (
       <div className="justify-center overflow-visible mx-auto px-4 flex flex-wrap">
         {this.props.albums.map((album) => (
           <AlbumCard album={album} />
         ))}
+
+        {emptyMessage}
         <span ref={this.props.triggerGetAlbumsRef}></span>
       </div>
     );

@@ -27,6 +27,7 @@ interface IState {
   albums: Album[];
   dateFilter: Date | undefined;
   genreFilter: string | undefined;
+  searchFilter: string;
   genreList: string[];
   triggerGetAlbumsRef: React.RefObject<HTMLSpanElement>;
   observer: IntersectionObserver;
@@ -39,6 +40,7 @@ class App extends React.Component<IProps, IState> {
     this.handleObserver = this.handleObserver.bind(this);
     this.updateDateFilter = this.updateDateFilter.bind(this);
     this.updateGenreFilter = this.updateGenreFilter.bind(this);
+    this.updateSearchFilter = this.updateSearchFilter.bind(this);
     this.replaceTrigger = this.replaceTrigger.bind(this);
 
     // Initialize page cache using current date as filter and page number 0
@@ -52,6 +54,7 @@ class App extends React.Component<IProps, IState> {
       pageCache: pageCache,
       dateFilter: undefined,
       genreFilter: undefined,
+      searchFilter: "",
       genreList: [],
       albums: [],
       triggerGetAlbumsRef: React.createRef(),
@@ -102,6 +105,14 @@ class App extends React.Component<IProps, IState> {
         return escape(album.genre) === this.state.genreFilter;
       }
       return true;
+    });
+
+    // Only include albums that pass the search string filter.
+    albums = albums.filter((album) => {
+      return (
+        album.artist.toLowerCase().includes(this.state.searchFilter) ||
+        album.title.toLowerCase().includes(this.state.searchFilter)
+      );
     });
 
     return albums;
@@ -262,6 +273,17 @@ class App extends React.Component<IProps, IState> {
   }
 
   /**
+   * Setter for active search string.
+   *
+   * @param {string} newFilter
+   */
+  updateSearchFilter(newFilter: string) {
+    this.setState({
+      searchFilter: newFilter,
+    });
+  }
+
+  /**
    * Refreshes infinite scroll trigger reference and removes the old one
    * from observer.
    */
@@ -279,6 +301,7 @@ class App extends React.Component<IProps, IState> {
           <FilterBar
             updateDateFilter={this.updateDateFilter}
             updateGenreFilter={this.updateGenreFilter}
+            updateSearchFilter={this.updateSearchFilter}
             genreList={this.state.genreList}
           />
         </div>

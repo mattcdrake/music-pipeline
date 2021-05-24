@@ -2,8 +2,9 @@
 import React, { ChangeEvent } from "react";
 
 interface FilterBarProps {
-  updateDateFilter: (date: Date | undefined) => void; // Updates parent component about active filters
-  updateGenreFilter: (genre: string | undefined) => void; // Updates parent component about active filters
+  updateDateFilter: (date: Date | undefined) => void;
+  updateGenreFilter: (genre: string | undefined) => void;
+  updateSearchFilter: (newFilter: string) => void;
   genreList: string[]; // List of genres to show as available genre filters
 }
 
@@ -18,6 +19,7 @@ export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
     this.handleDateClick = this.handleDateClick.bind(this);
     this.handleDateFilterXClick = this.handleDateFilterXClick.bind(this);
     this.handleGenreClick = this.handleGenreClick.bind(this);
+    this.handleSearchChange = this.handleSearchChange.bind(this);
 
     // Creates an initial date filter so only albums in the future are shown.
     this.props.updateDateFilter(new Date());
@@ -81,6 +83,16 @@ export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
     this.props.updateGenreFilter(newGenreFilter);
   }
 
+  /**
+   * Called when the user types something into the search bar.
+   *
+   * @param {ChangeEvent<HTMLInputElement>} event Contains search string
+   */
+  handleSearchChange(event: ChangeEvent<HTMLInputElement>) {
+    let newSearchString = event.target.value;
+    this.props.updateSearchFilter(newSearchString.toLowerCase());
+  }
+
   render() {
     let removeDateFilter;
     if (this.state.currentDate !== this.state.initialDate) {
@@ -125,6 +137,18 @@ export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
                 <option value={genre}>{genre}</option>
               ))}
             </select>
+          </label>
+        </div>
+
+        {/* Text search section */}
+        <div>
+          <label>
+            Search:
+            <input
+              type="text"
+              className="border mx-4"
+              onChange={this.handleSearchChange}
+            ></input>
           </label>
         </div>
       </div>
