@@ -168,7 +168,6 @@ const saveAlbum = (album: Album) => {
  * @param {boolean} useDB Indicates whether processed albums are stored in memory or a database.
  */
 const initialSetup = () => {
-  // getAlbumsFromWiki("https://en.wikipedia.org/wiki/List_of_2021_albums");
   const data = JSON.parse(fs.readFileSync("dist/data.json", "utf8"));
   processAlbumsObjRaw(data);
 };
