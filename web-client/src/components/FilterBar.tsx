@@ -52,7 +52,8 @@ export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
   handleDateClick(event: ChangeEvent<HTMLInputElement>) {
     this.setState({ currentDate: event.target.value });
     let newDate = new Date(event.target.value);
-    // Adding one because "month" input will return the day prior to the selected month (ex. May 2021 -> 30 April 2021)
+    // Adding one because "month" input will return the day prior to the
+    // selected month (ex. May 2021 -> 30 April 2021).
     newDate.setDate(newDate.getDate() + 1);
     this.props.updateDateFilter(newDate);
   }

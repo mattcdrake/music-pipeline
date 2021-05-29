@@ -21,6 +21,43 @@ const badAlbumURLs = [
   "https://en.wikipedia.org/wiki/Special:CentralAutoLogin/start?type=1x1",
 ];
 
+const buildDefaultHTTPOptions = (contentLen: number) => {
+  return {
+    hostname: "python-build-app.ue.r.appspot.com",
+    path: "/",
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Content-Length": contentLen,
+    },
+  };
+};
+
+const buildRequest = (options: any): http.ClientRequest => {
+  // Make request and parse response
+  return http.request(options, (res: any) => {
+    console.log(`STATUS: ${res.statusCode}`);
+    console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
+    res.setEncoding("utf8");
+    let rawData = "";
+
+    // Build JSON response
+    res.on("data", (chunk: any) => {
+      rawData += chunk;
+    });
+
+    // Parse JSON and pass it to processAlbumsObjRaw.
+    res.on("end", () => {
+      try {
+        const parsedData = JSON.parse(rawData);
+        processAlbumsObjRaw(parsedData);
+      } catch (e) {
+        console.error(e.message);
+      }
+    });
+  });
+};
+
 /**
  * Sends a request to table-scraping service asking for tables at url. Used to
  * parse Wikipedia tables.
@@ -38,46 +75,14 @@ const getAlbumsFromWiki = (url: string) => {
     skiprows: 1,
   });
 
-  // Request options
-  const options = {
-    hostname: "python-build-app.ue.r.appspot.com",
-    path: "/",
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Content-Length": Buffer.byteLength(getData),
-    },
-  };
-
-  // Make request and parse response
-  const req = http.request(options, (res: any) => {
-    console.log(`STATUS: ${res.statusCode}`);
-    console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
-    res.setEncoding("utf8");
-    let rawData = "";
-
-    // Build JSON response
-    res.on("data", (chunk: any) => {
-      rawData += chunk;
-    });
-
-    // Parse JSON and pass it to the callback function.
-    res.on("end", () => {
-      try {
-        const parsedData = JSON.parse(rawData);
-        processAlbumsObjRaw(parsedData);
-      } catch (e) {
-        console.error(e.message);
-      }
-    });
-  });
+  const options = buildDefaultHTTPOptions(Buffer.byteLength(getData));
+  const req: http.ClientRequest = buildRequest(options);
 
   // Bad request
   req.on("error", (e: any) => {
     console.error(`problem with request: ${e.message}`);
   });
 
-  // Write data to request body
   req.write(getData);
   req.end();
 };
