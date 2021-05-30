@@ -51,10 +51,7 @@ export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
    */
   handleDateClick(event: ChangeEvent<HTMLInputElement>) {
     this.setState({ currentDate: event.target.value });
-    let newDate = new Date(event.target.value);
-    // Adding one because "month" input will return the day prior to the
-    // selected month (ex. May 2021 -> 30 April 2021).
-    newDate.setDate(newDate.getDate() + 1);
+    let newDate = FilterBar.getFirstDayOfMonth(event.target.value);
     this.props.updateDateFilter(newDate);
   }
 
@@ -62,8 +59,7 @@ export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
    * Removes active date filters when the user clicks the 'X'.
    */
   handleDateFilterXClick() {
-    let newDate = new Date(this.state.initialDate);
-    newDate.setDate(newDate.getDate() + 1);
+    let newDate = FilterBar.getFirstDayOfMonth(this.state.initialDate);
     this.setState((prevState) => ({
       currentDate: prevState.initialDate,
     }));
@@ -92,6 +88,21 @@ export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
   handleSearchChange(event: ChangeEvent<HTMLInputElement>) {
     let newSearchString = event.target.value;
     this.props.updateSearchFilter(newSearchString.toLowerCase());
+  }
+
+  /**
+   * Takes a string (based on "Month" input element) and converts it to a date
+   * that is the first day of a given month.
+   *
+   * @param {string} month Based on format of "month" input element
+   * @returns {Date}
+   */
+  static getFirstDayOfMonth(month: string): Date {
+    // Adding one because "month" input will return the day prior to the
+    // selected month (ex. May 2021 -> 30 April 2021).
+    let newDate = new Date(month);
+    newDate.setDate(newDate.getDate() + 1);
+    return newDate;
   }
 
   render() {
