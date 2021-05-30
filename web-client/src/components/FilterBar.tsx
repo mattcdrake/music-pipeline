@@ -16,7 +16,7 @@ interface FilterBarState {
 export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
   constructor(props: FilterBarProps) {
     super(props);
-    this.handleDateClick = this.handleDateClick.bind(this);
+    this.handleDateFilterClick = this.handleDateFilterClick.bind(this);
     this.handleDateFilterXClick = this.handleDateFilterXClick.bind(this);
     this.handleGenreClick = this.handleGenreClick.bind(this);
     this.handleSearchChange = this.handleSearchChange.bind(this);
@@ -49,7 +49,7 @@ export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
    *
    * @param {ChangeEvent<HTMLInputElement>} event Contains new date value
    */
-  handleDateClick(event: ChangeEvent<HTMLInputElement>) {
+  handleDateFilterClick(event: ChangeEvent<HTMLInputElement>) {
     this.setState({ currentDate: event.target.value });
     let newDate = FilterBar.getFirstDayOfMonth(event.target.value);
     this.props.updateDateFilter(newDate);
@@ -128,7 +128,7 @@ export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
             <input
               type="month"
               className="border mx-4 align-middle cursor-pointer"
-              onChange={this.handleDateClick}
+              onChange={this.handleDateFilterClick}
               value={this.state.currentDate}
             ></input>
           </label>
