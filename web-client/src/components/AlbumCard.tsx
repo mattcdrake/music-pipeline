@@ -83,6 +83,7 @@ export class AlbumCard extends React.Component<AlbumCardProps, AlbumCardState> {
           />
         </div>
 
+        {/* Modal adapted from Tailwind UI */}
         <Transition appear show={this.state.modal_is_open} as={Fragment}>
           <Dialog
             as="div"
@@ -118,19 +119,23 @@ export class AlbumCard extends React.Component<AlbumCardProps, AlbumCardState> {
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
+                <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl border border-black">
                   <Dialog.Title
                     as="h3"
                     className="text-lg font-medium leading-6 text-gray-900"
                   >
-                    Payment successful
+                    {this.props.album.title}
                   </Dialog.Title>
-                  <div className="mt-2">
-                    <p className="text-sm text-gray-500">
-                      Your payment has been successfully submitted. We’ve sent
-                      your an email with all of the details of your order.
-                    </p>
-                  </div>
+                  <p className="text-lg font-bold">{this.props.album.artist}</p>
+                  <p className="text-sm text-gray-500">
+                    {this.props.album.releaseDate.toString()}
+                  </p>
+
+                  <img
+                    alt="album cover"
+                    className="mx-auto my-4 w-96 h-96"
+                    src={imgSrc}
+                  />
 
                   <div className="mt-4">
                     <button
@@ -138,7 +143,7 @@ export class AlbumCard extends React.Component<AlbumCardProps, AlbumCardState> {
                       className="inline-flex justify-center px-4 py-2 text-sm font-medium text-blue-900 bg-blue-100 border border-transparent rounded-md hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
                       onClick={this.closeModal}
                     >
-                      Got it, thanks!
+                      Back to the albums!
                     </button>
                   </div>
                 </div>
