@@ -19,6 +19,7 @@ const badAlbumURLs = [
   "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Unbalanced_scales.svg/45px-Unbalanced_scales.svg.png",
   "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Wiktionary-logo-en-v2.svg/40px-Wiktionary-logo-en-v2.svg.png",
   "https://en.wikipedia.org/wiki/Special:CentralAutoLogin/start?type=1x1",
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/S-K_2019.jpg/220px-S-K_2019.jpg",
 ];
 
 const buildDefaultHTTPOptions = (contentLen: number) => {

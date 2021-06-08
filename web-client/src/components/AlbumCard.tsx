@@ -42,9 +42,18 @@ export class AlbumCard extends React.Component<AlbumCardProps, AlbumCardState> {
   }
 
   render() {
+    // TEMPFIX. SHOULD BE REMOVED AFTER IMPROVING IMAGE SCRAPING
+    const badAlbums = [
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/S-K_2019.jpg/220px-S-K_2019.jpg",
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/SethSentrySuperCoolTreeHouse.jpg/220px-SethSentrySuperCoolTreeHouse.jpg",
+    ];
+
     // Placeholder image
     let imgSrc = "https://i.imgur.com/R6q9ogr.png";
-    if (typeof this.props.album.coverURL.href !== "undefined") {
+    if (
+      typeof this.props.album.coverURL.href !== "undefined" &&
+      !badAlbums.includes(this.props.album.coverURL.href)
+    ) {
       imgSrc = this.props.album.coverURL.href;
     }
 
