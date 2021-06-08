@@ -210,6 +210,7 @@ class App extends React.Component<IProps, IState> {
     const res = await fetch(apiURL);
     const data = await res.json();
     const albums = data.map((rawAlbum: RawAlbum) => ({
+      id: rawAlbum.id,
       artist: rawAlbum.artist,
       title: rawAlbum.title,
       genre: rawAlbum.genre,

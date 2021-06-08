@@ -1,5 +1,6 @@
 // An individual album
 export interface Album {
+  id: string;
   artist: string;
   title: string;
   genre: string;
@@ -9,6 +10,7 @@ export interface Album {
 
 // An individual album without meaningful types
 export interface RawAlbum {
+  id: string;
   artist: string;
   title: string;
   genre: string;

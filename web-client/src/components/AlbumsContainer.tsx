@@ -36,7 +36,7 @@ export class AlbumsContainer extends React.Component<
     return (
       <div className="justify-center overflow-visible mx-auto px-4 flex flex-wrap">
         {this.props.albums.map((album) => (
-          <AlbumCard album={album} />
+          <AlbumCard key={album.id} album={album} />
         ))}
 
         {emptyMessage}

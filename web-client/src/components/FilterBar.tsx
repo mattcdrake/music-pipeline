@@ -146,7 +146,9 @@ export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
             >
               <option value="none">None</option>
               {this.props.genreList.map((genre) => (
-                <option value={genre}>{genre}</option>
+                <option key={genre} value={genre}>
+                  {genre}
+                </option>
               ))}
             </select>
           </label>
