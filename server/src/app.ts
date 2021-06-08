@@ -3,6 +3,10 @@ import cors from "cors";
 import express from "express";
 import { Datastore } from "@google-cloud/datastore";
 
+// Types
+import { Album } from "../../types/src/types";
+import { entity } from "@google-cloud/datastore/build/src/entity";
+
 // App data
 const PORT = process.env.PORT || 8080;
 const app = express();
@@ -40,9 +44,14 @@ app.get("/api/albums/", async (req, res) => {
     query.offset(page * DEFAULT_PAGE_SIZE);
   }
 
-  const albums = await datastore
+  let albums: Album[] = await datastore
     .runQuery(query)
     .then((entities) => entities[0]);
+
+  albums = albums.map((album) => ({
+    ...album,
+    id: album[entity.KEY_SYMBOL].id.toString(),
+  }));
 
   res.status(200).json(albums);
 });

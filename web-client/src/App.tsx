@@ -10,7 +10,7 @@ import { Header } from "./components/Header";
 import { Navbar } from "./components/Navbar";
 
 // Types
-import { Album, RawAlbum } from "./types";
+import { Album, AlbumJSON } from "../../types/src/types";
 
 // Config
 import { config } from "./config";
@@ -209,7 +209,7 @@ class App extends React.Component<IProps, IState> {
 
     const res = await fetch(apiURL);
     const data = await res.json();
-    const albums = data.map((rawAlbum: RawAlbum) => ({
+    const albums = data.map((rawAlbum: AlbumJSON) => ({
       id: rawAlbum.id,
       artist: rawAlbum.artist,
       title: rawAlbum.title,

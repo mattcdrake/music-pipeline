@@ -1,5 +1,8 @@
-// An individual album
+import { entity } from "@google-cloud/datastore/build/src/entity";
+
+// Representation of an individual album
 export interface Album {
+  [entity.KEY_SYMBOL]?: entity.Key;
   id: string;
   artist: string;
   title: string;
@@ -9,7 +12,7 @@ export interface Album {
 }
 
 // An individual album without meaningful types
-export interface RawAlbum {
+export interface AlbumJSON {
   id: string;
   artist: string;
   title: string;

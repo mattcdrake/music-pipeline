@@ -4,7 +4,7 @@ import http from "http";
 import { datastore } from "./app";
 
 // Types
-import { Album } from "./types";
+import { Album } from "../../types/src/types";
 
 // Bad album images
 const badAlbumURLs = [
@@ -106,6 +106,7 @@ const albumObjToArray = (obj: any): Album[] => {
     const albumImage = badAlbumURLs.includes(album.images) ? "" : album.images;
 
     albums.push({
+      id: "",
       artist: album.Artist,
       title: album.Album,
       genre: album.Genre,

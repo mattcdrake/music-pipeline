@@ -4,7 +4,7 @@ import { shortenPhrase } from "../helpers";
 import { Dialog, Transition } from "@headlessui/react";
 
 // Types
-import { Album } from "../types";
+import { Album } from "../../../types/src/types";
 
 interface AlbumCardProps {
   album: Album;

@@ -5,7 +5,7 @@ import React from "react";
 import { AlbumCard } from "./AlbumCard";
 
 // Types
-import { Album } from "../types";
+import { Album } from "../../../types/src/types";
 
 interface AlbumsContainerProps {
   albums: Album[];
