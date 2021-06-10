@@ -10,6 +10,7 @@
     "start": "tsc && node dist/server/src/app.js",
     "start-init": "tsc && node dist/server/src/app.js --setupModule",
     "start-dev": "nodemon src/app.ts",
+    "start-scrape-test": "tsc && node dist/server/src/scraper/scraper.js --wiki",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Matt Drake",
@@ -19,6 +20,7 @@
     "cheerio": "^1.0.0-rc.10",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "got": "^9.6.0",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
@@ -26,6 +28,7 @@
     "@types/cors": "^2.8.10",
     "@types/express": "^4.17.11",
     "@types/faker": "^5.5.3",
+    "@types/got": "^9.6.11",
     "@types/lodash": "^4.14.168",
     "@types/nodemon": "^1.19.0",
     "faker": "^5.5.3",
