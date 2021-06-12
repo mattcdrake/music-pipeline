@@ -1,7 +1,7 @@
 // Dependencies
 import fs from "fs";
 import cheerio from "cheerio";
-import got, { GotError } from "got";
+import got from "got";
 
 // Types
 import { AlbumJSON } from "../../../types/src/types";
@@ -41,14 +41,7 @@ export const scrapeWiki = async (): Promise<AlbumJSON[]> => {
   }
 
   const $ = cheerio.load(wikiHTML);
-  const wikitables = $(".wikitable tbody tr td");
-
-  for (const table of wikitables) {
-    console.log(table);
-    console.log(
-      "-------------------------------------------------------------------------------------------------------------------------------------"
-    );
-  }
+  const wikitables = $(".wikitable tbody tr");
 
   return albums;
 };
