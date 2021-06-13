@@ -41,7 +41,18 @@ export const scrapeWiki = async (): Promise<AlbumJSON[]> => {
   }
 
   const $ = cheerio.load(wikiHTML);
-  const wikitables = $(".wikitable tbody tr");
+  const wikitables = $(".wikitable tbody").toArray();
+
+  // This needs to be iterated for every table.
+  {
+    // Determine whether this is a month/quarter table
+    const table = wikitables[0];
+    const rows = $("tr", table).slice(1);
+    const topRow = $("th", rows);
+    topRow.each((i, elem: cheerio.TagElement) => {
+      console.log(elem);
+    });
+  }
 
   return albums;
 };
