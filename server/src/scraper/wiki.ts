@@ -46,11 +46,11 @@ export const scrapeWiki = async (): Promise<AlbumJSON[]> => {
   // This needs to be iterated for every table.
   {
     // Determine whether this is a month/quarter table
-    const table = wikitables[0];
+    const table = wikitables;
     const rows = $("tr", table).slice(1);
     const topRow = $("th", rows);
     topRow.each((i, elem: cheerio.TagElement) => {
-      console.log(elem);
+      console.log(elem.children);
     });
   }
 
