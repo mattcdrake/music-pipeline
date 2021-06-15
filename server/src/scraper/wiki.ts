@@ -1,5 +1,5 @@
 // Dependencies
-import fs from "fs";
+import _ from "lodash";
 import cheerio from "cheerio";
 import got from "got";
 
@@ -26,6 +26,26 @@ const getHTML = async (url: string): Promise<string> => {
 };
 
 /**
+ * Takes a "tr" element and determines whether it's the top row of a given month's table.
+ *
+ * @param {cheerio.Cheerio} row
+ * @returns {boolean}
+ */
+const isMonthHeader = ($: cheerio.Root, row: cheerio.Cheerio): boolean => {
+  const cols = row.children().toArray().slice(0, 5);
+  const monthTitles = ["Release date", "Artist", "Album", "Genre", "Label"];
+  let rowTitles = [];
+
+  try {
+    rowTitles = cols.map((cell) => $(cell).text().trim());
+  } catch {
+    return false;
+  }
+
+  return _.isEqual(monthTitles, rowTitles);
+};
+
+/**
  * Parses the Wikipedia annual album releases page and converts the list of
  * albums to JSON.
  *
@@ -47,20 +67,14 @@ export const scrapeWiki = async (): Promise<AlbumJSON[]> => {
   {
     // Determine whether this is a month/quarter table
     const table = wikitables[0];
-    let rows = $("tr", table).slice(1);
-    const topRow = $("th", rows);
-    topRow.each((i, elem: cheerio.TagElement) => {
-      console.log(elem.firstChild.data.trim());
-    });
+    const rows = $("tr", table).slice(1);
+    const firstRow = rows.first();
 
-    rows = $("tr", table).slice(2);
-    rows.each((i, row: cheerio.TagElement) => {
-      console.log($(row).text().trim());
-      console.log($(row).html());
-      console.log(
-        "---------------------------------------------------------------------"
-      );
-    });
+    if (isMonthHeader($, firstRow)) {
+      console.log("processing month table");
+    } else {
+      console.log("checking for TBA albums");
+    }
   }
 
   return albums;
