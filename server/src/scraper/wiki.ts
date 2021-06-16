@@ -1,5 +1,5 @@
 // Dependencies
-import _ from "lodash";
+import _, { last } from "lodash";
 import cheerio from "cheerio";
 import got from "got";
 
@@ -23,6 +23,23 @@ const getHTML = async (url: string): Promise<string> => {
   } catch (error: any) {
     return GET_HTML_ERROR_MSG;
   }
+};
+
+/**
+ * Processes a row from a monthly table and adds it to the passed-in array.
+ *
+ * @param {cheerio.Root} $
+ * @param {cheerio.Cheerio} row
+ * @param {AlbumJSON[]} albums
+ */
+const processAlbum = (
+  $: cheerio.Root,
+  row: cheerio.Element,
+  albums: AlbumJSON[]
+) => {
+  const cols = $(row).children().toArray().slice(0, 5);
+  const colVals = cols.map((cell) => $(cell).text().trim());
+  console.log(colVals);
 };
 
 /**
@@ -71,7 +88,37 @@ export const scrapeWiki = async (): Promise<AlbumJSON[]> => {
     const firstRow = rows.first();
 
     if (isMonthHeader($, firstRow)) {
-      console.log("processing month table");
+      // Process each album in the table
+      let elemRows = rows.slice(1);
+
+      // Some rows in the table share a release date. I'm iterating through the
+      // table and tracking which elements have a rowspan value. If it does,
+      // save the date and the number of times it should be used. If the row
+      // _uses_ a prior date value, prepend the element array with the last
+      // date.
+      let lastDate: cheerio.Cheerio;
+      let dateIter = 0;
+
+      for (const row of elemRows) {
+        const rowspan = $(row).children().first().attr().rowspan;
+
+        if (dateIter > 0) {
+          $(lastDate).prependTo($(row));
+          dateIter--;
+          console.log(dateIter);
+          console.log($(row).text());
+        }
+
+        if (typeof rowspan !== "undefined") {
+          lastDate = $(row).children().first();
+          dateIter = parseInt(rowspan);
+
+          console.log(lastDate.text());
+        }
+
+        //processAlbum($, row, albums);
+        console.log("------------------------------------------------------");
+      }
     } else {
       console.log("checking for TBA albums");
     }
