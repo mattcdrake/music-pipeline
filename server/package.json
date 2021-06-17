@@ -10,7 +10,7 @@
     "start": "tsc && node dist/server/src/app.js",
     "start-init": "tsc && node dist/server/src/app.js --setupModule",
     "start-dev": "nodemon src/app.ts",
-    "start-scrape-test": "tsc && node dist/server/src/scraper/scraper.js --wiki",
+    "start-scrape": "tsc && node dist/server/src/scraper/scraper.js --wiki",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Matt Drake",
