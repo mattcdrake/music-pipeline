@@ -4,7 +4,7 @@ import cheerio from "cheerio";
 import got from "got";
 
 // Types
-import { Album, AlbumJSON } from "../../../types/src/types";
+import { AlbumJSON } from "../../../types/src/types";
 
 // Constants
 const WIKI_PAGE = "https://en.wikipedia.org/wiki/List_of_2021_albums";
@@ -26,20 +26,38 @@ const getHTML = async (url: string): Promise<string> => {
 };
 
 /**
+ * Gets the correct image for a given album. Prioritizes album art, falls back
+ * to artist and then placeholder art.
+ *
+ * @param {cheerio.Root} $
+ * @param {cheerio.Element} row
+ * @returns {string}
+ */
+const getArt = ($: cheerio.Root, row: cheerio.Element): string => {
+  // Does the album page have an image?
+
+  // Does the artist page have an image?
+
+  return "";
+};
+
+/**
  * Processes a row from a monthly table and adds it to the passed-in array.
  *
  * @param {cheerio.Root} $
- * @param {cheerio.Cheerio} row
+ * @param {cheerio.Element} row
  * @returns {AlbumJSON}
  */
 const processAlbum = ($: cheerio.Root, row: cheerio.Element): AlbumJSON => {
   const cols = $(row).children().toArray().slice(0, 5);
   const colVals = cols.map((cell) => $(cell).text().trim());
+  const genres = colVals[3].split(",");
+
   return {
     id: "",
     artist: colVals[1],
     title: colVals[2],
-    genre: colVals[3],
+    genres,
     releaseDate: colVals[0],
     coverURL: "",
   };
