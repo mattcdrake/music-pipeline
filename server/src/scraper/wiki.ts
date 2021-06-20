@@ -8,23 +8,7 @@ import { AlbumJSON } from "../../../types/src/types";
 
 // Constants
 const WIKI_ROOT = "https://en.wikipedia.org";
-const WIKI_PAGE = "https://en.wikipedia.org/wiki/List_of_2021_albums";
-const GET_HTML_ERROR_MSG = "Error retrieving HTML.";
-
-/**
- * Gets HTML for a given url. Returns an error message if something went wrong.
- *
- * @param {string} url
- * @returns {Promise<string>} HTML string or error message
- */
-const getHTML = async (url: string): Promise<string> => {
-  try {
-    const res = await got(url);
-    return res.body;
-  } catch (error: any) {
-    return GET_HTML_ERROR_MSG;
-  }
-};
+const WIKI_PAGE = "/wiki/List_of_2021_albums";
 
 /**
  * Checks a page for album artwork and returns it if present. Otherwise, returns
@@ -32,18 +16,25 @@ const getHTML = async (url: string): Promise<string> => {
  *
  * @param {cheerio.Root}
  * @param {cheerio.Element} album
- * @returns {string}
+ * @returns {Promise<string | null>}
  */
 const getAlbumArt = async (
   $: cheerio.Root,
   album: cheerio.Element
-): Promise<string> => {
+): Promise<string | null> => {
   const href = $("a", album).attr().href;
   const url = WIKI_ROOT + href;
-  const page = await getHTML(url);
+
+  let page;
+  try {
+    const res = await got(url);
+    page = res.body;
+  } catch (e: any) {
+    return null;
+  }
   console.log(page);
 
-  return "sanity check!";
+  return null;
 };
 
 /**
@@ -52,9 +43,12 @@ const getAlbumArt = async (
  *
  * @param {cheerio.Root} $
  * @param {cheerio.Element} row
- * @returns {string}
+ * @returns {Promise<string | null>}
  */
-const getImage = ($: cheerio.Root, row: cheerio.Element): string => {
+const getImage = async (
+  $: cheerio.Root,
+  row: cheerio.Element
+): Promise<string | null> => {
   // Does the album page have an image?
   const cols = $(row).children().toArray().slice(0, 5);
   const albumArtURL = getAlbumArt($, cols[2]);
@@ -68,7 +62,7 @@ const getImage = ($: cheerio.Root, row: cheerio.Element): string => {
 
   // Does the artist page have an image?
 
-  return "";
+  return null;
 };
 
 /**
@@ -169,9 +163,11 @@ const isMonthHeader = ($: cheerio.Root, row: cheerio.Cheerio): boolean => {
 export const scrapeWiki = async (): Promise<AlbumJSON[]> => {
   let albums: AlbumJSON[] = [];
 
-  const wikiHTML = await getHTML(WIKI_PAGE);
-
-  if (wikiHTML === GET_HTML_ERROR_MSG) {
+  let wikiHTML;
+  try {
+    const res = await got(WIKI_ROOT + WIKI_PAGE);
+    wikiHTML = res.body;
+  } catch (e: any) {
     return albums;
   }
 
@@ -179,7 +175,7 @@ export const scrapeWiki = async (): Promise<AlbumJSON[]> => {
   const wikitables = $(".wikitable tbody").toArray();
 
   for (const table of wikitables) {
-    let rows = $("tr", table).slice(1);
+    const rows = $("tr", table).slice(1);
     const firstRow = rows.first();
 
     if (isMonthHeader($, firstRow)) {
