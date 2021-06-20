@@ -7,6 +7,7 @@ import got from "got";
 import { AlbumJSON } from "../../../types/src/types";
 
 // Constants
+const WIKI_ROOT = "https://en.wikipedia.org";
 const WIKI_PAGE = "https://en.wikipedia.org/wiki/List_of_2021_albums";
 const GET_HTML_ERROR_MSG = "Error retrieving HTML.";
 
@@ -26,6 +27,26 @@ const getHTML = async (url: string): Promise<string> => {
 };
 
 /**
+ * Checks a page for album artwork and returns it if present. Otherwise, returns
+ * an empty string.
+ *
+ * @param {cheerio.Root}
+ * @param {cheerio.Element} album
+ * @returns {string}
+ */
+const getAlbumArt = async (
+  $: cheerio.Root,
+  album: cheerio.Element
+): Promise<string> => {
+  const href = $("a", album).attr().href;
+  const url = WIKI_ROOT + href;
+  const page = await getHTML(url);
+  console.log(page);
+
+  return "sanity check!";
+};
+
+/**
  * Gets the correct image for a given album. Prioritizes album art, falls back
  * to artist and then placeholder art.
  *
@@ -33,8 +54,17 @@ const getHTML = async (url: string): Promise<string> => {
  * @param {cheerio.Element} row
  * @returns {string}
  */
-const getArt = ($: cheerio.Root, row: cheerio.Element): string => {
+const getImage = ($: cheerio.Root, row: cheerio.Element): string => {
   // Does the album page have an image?
+  const cols = $(row).children().toArray().slice(0, 5);
+  const albumArtURL = getAlbumArt($, cols[2]);
+
+  /**
+   * 1) There is an album page, and it has an image
+   *      - Get image
+   * 2) There is an album page, but it doens't have an image
+   * 3) There isn't an album page
+   */
 
   // Does the artist page have an image?
 
@@ -52,6 +82,14 @@ const processAlbum = ($: cheerio.Root, row: cheerio.Element): AlbumJSON => {
   const cols = $(row).children().toArray().slice(0, 5);
   const colVals = cols.map((cell) => $(cell).text().trim());
   const genres = colVals[3].split(",");
+
+  for (let i = 0; i < genres.length; ++i) {
+    genres[i] = genres[i].trim();
+  }
+
+  if (colVals[2] === "Sympathetic Magic") {
+    getImage($, row);
+  }
 
   return {
     id: "",
