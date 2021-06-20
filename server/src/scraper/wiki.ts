@@ -11,30 +11,56 @@ const WIKI_ROOT = "https://en.wikipedia.org";
 const WIKI_PAGE = "/wiki/List_of_2021_albums";
 
 /**
+ * Strips out "//" from the beginning of a string. Used for removing relative
+ * protocols from src attributes.
+ *
+ * @param {string} src
+ * @param {string}
+ */
+const stripRelProto = (src: string): string => {
+  if (src.length < 2 || src.substr(0, 2) !== "//") {
+    return src;
+  }
+
+  return src.substr(2);
+};
+
+/**
  * Checks a page for album artwork and returns it if present. Otherwise, returns
  * an empty string.
  *
- * @param {cheerio.Root}
+ * @param {cheerio.Root} $
  * @param {cheerio.Element} album
- * @returns {Promise<string | null>}
+ * @returns {Promise<string | undefined>}
  */
 const getAlbumArt = async (
   $: cheerio.Root,
   album: cheerio.Element
-): Promise<string | null> => {
-  const href = $("a", album).attr().href;
-  const url = WIKI_ROOT + href;
+): Promise<string | undefined> => {
+  let href;
+  try {
+    href = $("a", album).attr().href;
+  } catch (e: any) {
+    return undefined;
+  }
 
-  let page;
+  const url = WIKI_ROOT + href;
+  let page, art;
   try {
     const res = await got(url);
     page = res.body;
+    $ = cheerio.load(page);
+    art = $(".infobox img").attr("src");
   } catch (e: any) {
-    return null;
+    return undefined;
   }
-  console.log(page);
 
-  return null;
+  if (typeof art === "undefined") {
+    return undefined;
+  }
+
+  console.log("https://" + stripRelProto(art));
+  return "https://" + stripRelProto(art);
 };
 
 /**
@@ -43,12 +69,12 @@ const getAlbumArt = async (
  *
  * @param {cheerio.Root} $
  * @param {cheerio.Element} row
- * @returns {Promise<string | null>}
+ * @returns {Promise<string | undefined>}
  */
 const getImage = async (
   $: cheerio.Root,
   row: cheerio.Element
-): Promise<string | null> => {
+): Promise<string | undefined> => {
   // Does the album page have an image?
   const cols = $(row).children().toArray().slice(0, 5);
   const albumArtURL = getAlbumArt($, cols[2]);
@@ -62,7 +88,7 @@ const getImage = async (
 
   // Does the artist page have an image?
 
-  return null;
+  return undefined;
 };
 
 /**
@@ -72,7 +98,10 @@ const getImage = async (
  * @param {cheerio.Element} row
  * @returns {AlbumJSON}
  */
-const processAlbum = ($: cheerio.Root, row: cheerio.Element): AlbumJSON => {
+const processAlbum = async (
+  $: cheerio.Root,
+  row: cheerio.Element
+): Promise<AlbumJSON> => {
   const cols = $(row).children().toArray().slice(0, 5);
   const colVals = cols.map((cell) => $(cell).text().trim());
   const genres = colVals[3].split(",");
@@ -81,8 +110,11 @@ const processAlbum = ($: cheerio.Root, row: cheerio.Element): AlbumJSON => {
     genres[i] = genres[i].trim();
   }
 
+  let coverURL;
   if (colVals[2] === "Sympathetic Magic") {
-    getImage($, row);
+    coverURL = await getImage($, row);
+  } else {
+    coverURL = undefined;
   }
 
   return {
@@ -91,7 +123,7 @@ const processAlbum = ($: cheerio.Root, row: cheerio.Element): AlbumJSON => {
     title: colVals[2],
     genres,
     releaseDate: colVals[0],
-    coverURL: "",
+    coverURL,
   };
 };
 
@@ -102,10 +134,10 @@ const processAlbum = ($: cheerio.Root, row: cheerio.Element): AlbumJSON => {
  * @param {cheerio.Cheerio} rows
  * @returns {AlbumJSON[]}
  */
-const processMonthTable = (
+const processMonthTable = async (
   $: cheerio.Root,
   rows: cheerio.Cheerio
-): AlbumJSON[] => {
+): Promise<AlbumJSON[]> => {
   // Some rows in the table share a release date. I'm iterating through the
   // table and tracking which elements have a rowspan value. If it does,
   // save the date and the number of times it should be used. If the row
@@ -128,7 +160,7 @@ const processMonthTable = (
       lastDateCt = parseInt(rowspan) - 1;
     }
 
-    albums.push(processAlbum($, row));
+    albums.push(await processAlbum($, row));
   }
 
   return albums;
@@ -179,7 +211,7 @@ export const scrapeWiki = async (): Promise<AlbumJSON[]> => {
     const firstRow = rows.first();
 
     if (isMonthHeader($, firstRow)) {
-      const tableAlbums = processMonthTable($, rows.slice(1));
+      const tableAlbums = await processMonthTable($, rows.slice(1));
       albums = albums.concat(tableAlbums);
     } else {
       console.log("checking for TBA albums");
