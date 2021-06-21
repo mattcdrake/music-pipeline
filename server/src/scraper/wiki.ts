@@ -220,3 +220,7 @@ export const scrapeWiki = async (): Promise<AlbumJSON[]> => {
 
   return albums;
 };
+
+export const testFuncs = {
+  stripRelProto,
+};
