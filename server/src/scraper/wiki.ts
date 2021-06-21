@@ -9,6 +9,7 @@ import { AlbumJSON } from "../../../types/src/types";
 // Constants
 const WIKI_ROOT = "https://en.wikipedia.org";
 const WIKI_PAGE = "/wiki/List_of_2021_albums";
+const DEFAULT_ALBUM_IMG = "https://i.imgur.com/R6q9ogr.png";
 
 /**
  * Strips out "//" from the beginning of a string. Used for removing relative
@@ -26,30 +27,16 @@ const stripRelProto = (src: string): string => {
 };
 
 /**
- * Checks a page for album artwork and returns it if present. Otherwise, returns
- * an empty string.
+ * Checks a page for an infobox image and returns it if present. Otherwise,
+ * returns undefined.
  *
- * @param {cheerio.Root} $
- * @param {cheerio.Element} album
- * @returns {Promise<string | undefined>}
+ * @param {string} html
+ * @returns {string | undefined}
  */
-const getAlbumArt = async (
-  $: cheerio.Root,
-  album: cheerio.Element
-): Promise<string | undefined> => {
-  let href;
+const getInfoboxImage = (html: string): string | undefined => {
+  let $, art;
   try {
-    href = $("a", album).attr().href;
-  } catch (e: any) {
-    return undefined;
-  }
-
-  const url = WIKI_ROOT + href;
-  let page, art;
-  try {
-    const res = await got(url);
-    page = res.body;
-    $ = cheerio.load(page);
+    $ = cheerio.load(html);
     art = $(".infobox img").attr("src");
   } catch (e: any) {
     return undefined;
@@ -59,8 +46,36 @@ const getAlbumArt = async (
     return undefined;
   }
 
-  console.log("https://" + stripRelProto(art));
   return "https://" + stripRelProto(art);
+};
+
+/**
+ * Parses a Cheerio element for a link and attempts to get its HTML.
+ *
+ * @param {cheerio.Root} $
+ * @param {cheerio.Element} elem
+ * @returns {Promise<string | undefined>}
+ */
+const getHTMLFromElement = async (
+  $: cheerio.Root,
+  elem: cheerio.Element
+): Promise<string | undefined> => {
+  let href;
+  try {
+    href = $("a", elem).attr().href;
+  } catch (e: any) {
+    return undefined;
+  }
+
+  let html;
+  try {
+    const res = await got(WIKI_ROOT + href);
+    html = res.body;
+  } catch (e: any) {
+    return undefined;
+  }
+
+  return html;
 };
 
 /**
@@ -69,26 +84,41 @@ const getAlbumArt = async (
  *
  * @param {cheerio.Root} $
  * @param {cheerio.Element} row
- * @returns {Promise<string | undefined>}
+ * @returns {string}
  */
-const getImage = async (
-  $: cheerio.Root,
-  row: cheerio.Element
-): Promise<string | undefined> => {
+const getImage = (albumHTML: string, artistHTML: string): string => {
   // Does the album page have an image?
-  const cols = $(row).children().toArray().slice(0, 5);
-  const albumArtURL = getAlbumArt($, cols[2]);
-
-  /**
-   * 1) There is an album page, and it has an image
-   *      - Get image
-   * 2) There is an album page, but it doens't have an image
-   * 3) There isn't an album page
-   */
+  const albumArtURL = getInfoboxImage(albumHTML);
+  if (typeof albumArtURL !== "undefined") {
+    return albumArtURL;
+  }
 
   // Does the artist page have an image?
+  const artistImgURL = getInfoboxImage(artistHTML);
+  if (typeof artistImgURL !== "undefined") {
+    return artistImgURL;
+  }
 
-  return undefined;
+  return DEFAULT_ALBUM_IMG;
+};
+
+/**
+ * Get genres from an artist page.
+ *
+ * @param {string} html
+ * @returns {string[]}
+ */
+const getGenres = (html: string): string[] => {
+  let genres: string[] = [];
+
+  let $;
+  try {
+    $ = cheerio.load(html);
+  } catch (e: any) {
+    return genres;
+  }
+
+  return genres;
 };
 
 /**
@@ -104,18 +134,24 @@ const processAlbum = async (
 ): Promise<AlbumJSON> => {
   const cols = $(row).children().toArray().slice(0, 5);
   const colVals = cols.map((cell) => $(cell).text().trim());
-  const genres = colVals[3].split(",");
+  const albumHTML: string | undefined = await getHTMLFromElement($, cols[2]);
+  const artistHTML: string | undefined = await getHTMLFromElement($, cols[1]);
 
+  // Get genres from upcoming albums page and artist page, then combine them.
+  let genres = colVals[3].split(",");
   for (let i = 0; i < genres.length; ++i) {
     genres[i] = genres[i].trim();
   }
 
-  let coverURL;
-  if (colVals[2] === "Sympathetic Magic") {
-    coverURL = await getImage($, row);
-  } else {
-    coverURL = undefined;
+  const addlGenres = getGenres(artistHTML);
+  for (const genre of addlGenres) {
+    genres.push(genre);
   }
+
+  genres = genres.filter((genre) => genre !== "");
+
+  // Get correct image
+  const coverURL = getImage(albumHTML, artistHTML);
 
   return {
     id: "",
@@ -206,6 +242,20 @@ export const scrapeWiki = async (): Promise<AlbumJSON[]> => {
   const $ = cheerio.load(wikiHTML);
   const wikitables = $(".wikitable tbody").toArray();
 
+  // REMOVE AFTER UNCOMMENTING BELOW
+  const table = wikitables[9];
+  const rows = $("tr", table).slice(1);
+  const firstRow = rows.first();
+
+  if (isMonthHeader($, firstRow)) {
+    const tableAlbums = await processMonthTable($, rows.slice(1));
+    albums = albums.concat(tableAlbums);
+  } else {
+    console.log("checking for TBA albums");
+  }
+  // END REMOVE
+
+  /*
   for (const table of wikitables) {
     const rows = $("tr", table).slice(1);
     const firstRow = rows.first();
@@ -217,7 +267,9 @@ export const scrapeWiki = async (): Promise<AlbumJSON[]> => {
       console.log("checking for TBA albums");
     }
   }
+  */
 
+  console.log(albums);
   return albums;
 };
 
