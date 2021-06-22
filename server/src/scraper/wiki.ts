@@ -10,6 +10,7 @@ import { AlbumJSON } from "../../../types/src/types";
 const WIKI_ROOT = "https://en.wikipedia.org";
 const WIKI_PAGE = "/wiki/List_of_2021_albums";
 const DEFAULT_ALBUM_IMG = "https://i.imgur.com/R6q9ogr.png";
+const CURRENT_YEAR = 2021;
 
 /**
  * Strips out "//" from the beginning of a string. Used for removing relative
@@ -180,10 +181,12 @@ const processMonthTable = async (
   // _uses_ a prior date value, prepend the element array with the last
   // date.
   let albums: AlbumJSON[] = [];
+  let firstDate: cheerio.Cheerio | undefined = undefined;
   let lastDate: cheerio.Cheerio;
   let lastDateCt = 0;
 
-  for (const row of rows) {
+  //for (const row of rows) {
+  for (const row of rows.slice(-11)) {
     const rowspan = $(row).children().first().attr().rowspan;
 
     if (lastDateCt > 0) {
@@ -196,8 +199,38 @@ const processMonthTable = async (
       lastDateCt = parseInt(rowspan) - 1;
     }
 
-    albums.push(await processAlbum($, row));
+    if (typeof firstDate === "undefined") {
+      firstDate = $(row).children().first();
+    }
+
+    const album = await processAlbum($, row);
+    albums.push(album);
   }
+
+  // Append current year to recently parsed albums
+  albums
+    .filter((album) => album.releaseDate !== "TBA")
+    .forEach((album) => {
+      album.releaseDate = album.releaseDate + `, ${CURRENT_YEAR}`;
+    });
+
+  // Converting release date to string rep. of JS date object
+  albums
+    .filter((album) => album.releaseDate !== "TBA")
+    .forEach((album) => {
+      const date = new Date(album.releaseDate);
+      album.releaseDate = date.toString();
+    });
+
+  // Setting albums with "TBA" release dates to have a date at the last day of
+  // the current month.
+  albums
+    .filter((album) => album.releaseDate === "TBA")
+    .forEach((album) => {
+      const date = new Date($(firstDate).text().trim());
+      const newDate = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+      album.releaseDate = newDate.toString();
+    });
 
   return albums;
 };
@@ -243,7 +276,7 @@ export const scrapeWiki = async (): Promise<AlbumJSON[]> => {
   const wikitables = $(".wikitable tbody").toArray();
 
   // REMOVE AFTER UNCOMMENTING BELOW
-  const table = wikitables[9];
+  const table = wikitables[7];
   const rows = $("tr", table).slice(1);
   const firstRow = rows.first();
 
