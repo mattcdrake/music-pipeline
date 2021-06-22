@@ -148,18 +148,22 @@ const processAlbum = async (
   for (const genre of addlGenres) {
     genres.push(genre);
   }
-
   genres = genres.filter((genre) => genre !== "");
 
-  // Get correct image
   const coverURL = getImage(albumHTML, artistHTML);
+  let releaseDate =
+    colVals[0] === "TBA" ? "TBA" : `${colVals[0]}, ${CURRENT_YEAR}`;
+
+  if (releaseDate !== "TBA") {
+    releaseDate = new Date(releaseDate).toString();
+  }
 
   return {
     id: "",
     artist: colVals[1],
     title: colVals[2],
     genres,
-    releaseDate: colVals[0],
+    releaseDate,
     coverURL,
   };
 };
@@ -206,13 +210,6 @@ const processMonthTable = async (
     const album = await processAlbum($, row);
     albums.push(album);
   }
-
-  // Append current year to recently parsed albums
-  albums
-    .filter((album) => album.releaseDate !== "TBA")
-    .forEach((album) => {
-      album.releaseDate = album.releaseDate + `, ${CURRENT_YEAR}`;
-    });
 
   // Converting release date to string rep. of JS date object
   albums
