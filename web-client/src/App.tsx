@@ -102,7 +102,7 @@ class App extends React.Component<IProps, IState> {
     // Only include albums that are in the selected genre
     albums = albums.filter((album) => {
       if (this.state.genreFilter) {
-        return escape(album.genre) === this.state.genreFilter;
+        return album.genres.includes(this.state.genreFilter);
       }
       return true;
     });
@@ -213,7 +213,7 @@ class App extends React.Component<IProps, IState> {
       id: rawAlbum.id,
       artist: rawAlbum.artist,
       title: rawAlbum.title,
-      genre: rawAlbum.genre,
+      genres: rawAlbum.genres,
       releaseDate: new Date(rawAlbum.releaseDate),
       coverURL: rawAlbum.coverURL === "" ? "" : new URL(rawAlbum.coverURL),
     }));
@@ -264,8 +264,11 @@ class App extends React.Component<IProps, IState> {
   updateGenreList() {
     let newGenreList: string[] = [];
     for (const album of this.state.albums) {
-      if (!newGenreList.includes(album.genre)) {
-        newGenreList.push(album.genre);
+      console.log(album.genres);
+      for (const genre of album.genres) {
+        if (!newGenreList.includes(genre)) {
+          newGenreList.push(genre);
+        }
       }
     }
     this.setState({

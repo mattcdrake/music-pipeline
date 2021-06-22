@@ -110,7 +110,7 @@ const albumObjToArray = (obj: any): Album[] => {
       id: "",
       artist: album.Artist,
       title: album.Album,
-      genre: album.Genre,
+      genres: album.Genre,
       releaseDate: new Date(`${album["Release date"]}, 2021`),
       coverURL: albumImage,
     });
@@ -161,7 +161,7 @@ const saveAlbum = (album: Album) => {
     data: {
       artist: album.artist,
       title: album.title,
-      genre: album.genre,
+      genre: album.genres,
       releaseDate: album.releaseDate,
       coverURL: album.coverURL.toString(),
     },

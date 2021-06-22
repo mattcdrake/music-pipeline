@@ -6,7 +6,7 @@ export interface Album {
   id: string;
   artist: string;
   title: string;
-  genre: string;
+  genres: string[];
   releaseDate: Date;
   coverURL: URL;
 }
@@ -16,7 +16,7 @@ export interface AlbumJSON {
   id: string;
   artist: string;
   title: string;
-  genre: string;
+  genres: string[];
   releaseDate: string;
   coverURL: string;
 }
