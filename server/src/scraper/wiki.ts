@@ -112,11 +112,26 @@ const getImage = (albumHTML: string, artistHTML: string): string => {
 const getGenres = (html: string): string[] => {
   let genres: string[] = [];
 
-  let $;
+  let $: cheerio.Root;
   try {
     $ = cheerio.load(html);
   } catch (e: any) {
     return genres;
+  }
+
+  // Finds the "Genres" row from the infobox and strips out the genres from the
+  // right side.
+  const rows = $(".infobox tr");
+  for (const row of rows) {
+    const title = $("th", row).text().trim();
+
+    if (title === "Genres") {
+      const anchors = $("td a", row).toArray();
+      let anchorStrs = anchors.map((anchor) => $(anchor).text());
+      anchorStrs = anchorStrs.filter((str) => str.indexOf("[") === -1);
+      anchorStrs = anchorStrs.map((str) => str.toLowerCase());
+      genres = genres.concat(anchorStrs);
+    }
   }
 
   return genres;
@@ -150,13 +165,15 @@ const processAlbum = async (
   }
   genres = genres.filter((genre) => genre !== "");
 
-  const coverURL = getImage(albumHTML, artistHTML);
+  // Convert release dates to a JS Date string or "TBA"
   let releaseDate =
     colVals[0] === "TBA" ? "TBA" : `${colVals[0]}, ${CURRENT_YEAR}`;
 
   if (releaseDate !== "TBA") {
     releaseDate = new Date(releaseDate).toString();
   }
+
+  const coverURL = getImage(albumHTML, artistHTML);
 
   return {
     id: "",
