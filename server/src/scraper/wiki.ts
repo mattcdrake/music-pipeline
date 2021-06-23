@@ -11,6 +11,7 @@ const WIKI_ROOT = "https://en.wikipedia.org";
 const WIKI_PAGE = "/wiki/List_of_2021_albums";
 const DEFAULT_ALBUM_IMG = "https://i.imgur.com/R6q9ogr.png";
 const CURRENT_YEAR = 2021;
+const SCRAPE_START_MONTH = 5;
 
 /**
  * Strips out "//" from the beginning of a string. Used for removing relative
@@ -287,22 +288,12 @@ export const scrapeWiki = async (): Promise<AlbumJSON[]> => {
   }
 
   const $ = cheerio.load(wikiHTML);
-  const wikitables = $(".wikitable tbody").toArray();
 
-  // REMOVE AFTER UNCOMMENTING BELOW
-  const table = wikitables[7];
-  const rows = $("tr", table).slice(1);
-  const firstRow = rows.first();
+  // This is tech debt. The slice is to grab only the tables from June onward,
+  // since I'm building this in June.  This function should take parameters that
+  // decide this.
+  const wikitables = $(".wikitable tbody").toArray().slice(SCRAPE_START_MONTH);
 
-  if (isMonthHeader($, firstRow)) {
-    const tableAlbums = await processMonthTable($, rows.slice(1));
-    albums = albums.concat(tableAlbums);
-  } else {
-    console.log("checking for TBA albums");
-  }
-  // END REMOVE
-
-  /*
   for (const table of wikitables) {
     const rows = $("tr", table).slice(1);
     const firstRow = rows.first();
@@ -314,9 +305,7 @@ export const scrapeWiki = async (): Promise<AlbumJSON[]> => {
       console.log("checking for TBA albums");
     }
   }
-  */
 
-  console.log(albums);
   return albums;
 };
 
