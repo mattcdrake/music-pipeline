@@ -264,7 +264,10 @@ class App extends React.Component<IProps, IState> {
   updateGenreList() {
     let newGenreList: string[] = [];
     for (const album of this.state.albums) {
-      console.log(album.genres);
+      if (typeof album.genres === "undefined") {
+        continue;
+      }
+
       for (const genre of album.genres) {
         if (!newGenreList.includes(genre)) {
           newGenreList.push(genre);
