@@ -4,7 +4,6 @@
   "description": "Music Pipeline Backend",
   "main": "dist/server/src/app.js",
   "scripts": {
-    "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
     "build": "tsc",
     "prestart": "npm run build",
     "start": "tsc && node dist/server/src/app.js",

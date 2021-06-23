@@ -201,12 +201,12 @@ const processMonthTable = async (
   // save the date and the number of times it should be used. If the row
   // _uses_ a prior date value, prepend the element array with the last
   // date.
-  let albums: AlbumJSON[] = [];
-  let firstDate: cheerio.Cheerio | undefined = undefined;
+  const albums: AlbumJSON[] = [];
+  let firstDate: cheerio.Cheerio | undefined;
   let lastDate: cheerio.Cheerio;
   let lastDateCt = 0;
 
-  //for (const row of rows) {
+  // for (const row of rows) {
   for (const row of rows.slice(-11)) {
     const rowspan = $(row).children().first().attr().rowspan;
 
