@@ -8,7 +8,7 @@ export interface Album {
   title: string;
   genres: string[];
   releaseDate: Date;
-  coverURL: URL;
+  coverURL: string;
 }
 
 // An individual album without meaningful types
