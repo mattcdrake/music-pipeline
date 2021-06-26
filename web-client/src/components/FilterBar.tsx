@@ -11,6 +11,8 @@ interface FilterBarProps {
 interface FilterBarState {
   currentDate: string; // The current date in the date filter, represented as "YYYY-MM" based on the month input element.
   initialDate: string; // The initial date in the date filter, represented as "YYYY-MM" based on the month input element.
+  currentGenre: string;
+  initialGenre: string;
 }
 
 export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
@@ -28,6 +30,8 @@ export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
     this.state = {
       currentDate: inputDateStr,
       initialDate: inputDateStr,
+      currentGenre: "none",
+      initialGenre: "none",
     };
   }
 
@@ -77,6 +81,11 @@ export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
     if (event.target.value !== "none") {
       newGenreFilter = event.target.value;
     }
+
+    let newGenreState =
+      typeof newGenreFilter === "undefined" ? "none" : newGenreFilter;
+
+    this.setState({ currentGenre: newGenreState });
     this.props.updateGenreFilter(newGenreFilter);
   }
 
@@ -106,11 +115,25 @@ export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
   }
 
   render() {
-    let removeDateFilter;
+    let removeDateFilter, removeGenreFilter;
     if (this.state.currentDate !== this.state.initialDate) {
       removeDateFilter = (
         <span
           onClick={this.handleDateFilterXClick}
+          className="ml-4 cursor-pointer"
+        >
+          &#x274C;
+        </span>
+      );
+    }
+
+    if (this.state.currentGenre !== this.state.initialGenre) {
+      removeGenreFilter = (
+        <span
+          onClick={() => {
+            this.props.updateGenreFilter(undefined);
+            this.setState({ currentGenre: "none" });
+          }}
           className="ml-4 cursor-pointer"
         >
           &#x274C;
@@ -138,11 +161,13 @@ export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
         <div>
           <label className="m-auto">
             Genre Filter
+            {removeGenreFilter}
             <select
               className="mx-4"
               onChange={this.handleGenreClick}
               id="genreFilter"
               name="genres"
+              value={this.state.currentGenre}
             >
               <option value="none">None</option>
               {this.props.genreList.map((genre) => (
