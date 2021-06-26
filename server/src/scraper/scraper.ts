@@ -25,8 +25,12 @@ const execute = async () => {
   // Wikipedia scraping routine
   if (process.argv.includes("--wiki")) {
     const albums: AlbumJSON[] = await scrapeWiki();
+
+    const now = new Date();
+    const today = `${now.getFullYear()}.${now.getMonth() + 1}.${now.getDate()}`;
+
     fs.writeFileSync(
-      "./dist/server/src/scraper/results/albumsJune25.json",
+      `./dist/server/src/scraper/results/${today}.json`,
       JSON.stringify(albums)
     );
     mergeAlbums(albums);
