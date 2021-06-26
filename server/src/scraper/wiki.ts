@@ -208,7 +208,7 @@ const processMonthTable = async (
   let lastDateCt = 0;
 
   // for (const row of rows) {
-  for (const row of rows.slice(-11)) {
+  for (const row of rows) {
     const rowspan = $(row).children().first().attr().rowspan;
 
     if (lastDateCt > 0) {

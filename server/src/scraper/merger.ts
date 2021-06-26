@@ -11,20 +11,58 @@ const datastore = new Datastore();
 /**
  * Gets an album from datastore or returns undefined.
  *
- * @param {AlbumJSON} album
+ * @param {string} artist
+ * @param {string} title
  * @returns {boolean}
  */
-const getAlbum = async (album: AlbumJSON): Promise<Album | undefined> => {
+const getAlbumsByNameTitle = async (
+  artist: string,
+  title: string
+): Promise<Album[] | undefined> => {
   const query = datastore
     .createQuery("album")
-    .filter("artist", "=", album.artist)
-    .filter("title", "=", album.title);
+    .filter("artist", "=", artist)
+    .filter("title", "=", title);
 
-  const result: Album | undefined = await datastore
+  const result: Album[] | undefined = await datastore
     .runQuery(query)
-    .then((entities: RunQueryResponse) => entities[0][0]);
+    .then((entities: RunQueryResponse) => entities[0]);
 
   return result;
+};
+
+/**
+ * Takes an album and an array of albums. Returns the album in the array with a
+ * release date closest to the supplied album.
+ *
+ * Empty arrays will return undefined.
+ *
+ * @param {Album} album
+ * @param {Album[]} comparedAlbums
+ * @returns {Album | undefined}
+ */
+const getClosestDatedAlbum = (
+  album: Album,
+  comparedAlbums: Album[]
+): Album | undefined => {
+  let res = undefined;
+  let minTime = Infinity;
+
+  if (typeof album === "undefined") {
+    return comparedAlbums[0];
+  }
+
+  for (const comp of comparedAlbums) {
+    const delta = Math.abs(
+      album.releaseDate.getTime() - comp.releaseDate.getTime()
+    );
+    if (delta < minTime) {
+      res = comp;
+      minTime = delta;
+    }
+  }
+
+  return res;
 };
 
 /**
@@ -71,7 +109,7 @@ const updateAlbum = (entity: Album, album: AlbumJSON) => {
  * @param {AlbumJSON} album2
  * @returns {boolean}
  */
-const isSameAlbum = (album1: Album, album2: AlbumJSON): boolean => {
+const areEqualAlbums = (album1: Album, album2: AlbumJSON): boolean => {
   if (
     album1.artist !== album2.artist ||
     album1.title !== album2.title ||
@@ -92,12 +130,24 @@ const isSameAlbum = (album1: Album, album2: AlbumJSON): boolean => {
  */
 export const mergeAlbums = async (albums: AlbumJSON[]) => {
   for (const album of albums) {
-    let entity = await getAlbum(album);
+    const albumEntities = await getAlbumsByNameTitle(album.artist, album.title);
+    const firstAlbum = albumEntities[0];
 
-    if (typeof entity === "undefined") {
+    const tbaEntities = await getAlbumsByNameTitle(album.artist, "TBA");
+    const tbaToUpdate = getClosestDatedAlbum(firstAlbum, tbaEntities);
+
+    if (
+      typeof firstAlbum === "undefined" &&
+      typeof tbaToUpdate !== "undefined"
+    ) {
+      // This album hasn't been seen before and there is a "TBA" album
+      updateAlbum(tbaToUpdate, album);
+    } else if (typeof firstAlbum === "undefined") {
+      // This album hasn't been seen before and there isn't a "TBA" album
       addAlbum(album);
-    } else if (!isSameAlbum(entity, album)) {
-      updateAlbum(entity, album);
+    } else if (!areEqualAlbums(firstAlbum, album)) {
+      // This album is already present and needs to be updated
+      updateAlbum(firstAlbum, album);
     }
   }
 };
