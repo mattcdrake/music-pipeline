@@ -42,20 +42,17 @@ export class AlbumCard extends React.Component<AlbumCardProps, AlbumCardState> {
   }
 
   render() {
-    // TEMPFIX. SHOULD BE REMOVED AFTER IMPROVING IMAGE SCRAPING
-    const badAlbums = [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/S-K_2019.jpg/220px-S-K_2019.jpg",
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/SethSentrySuperCoolTreeHouse.jpg/220px-SethSentrySuperCoolTreeHouse.jpg",
-    ];
-
     // Placeholder image
     let imgSrc = "https://i.imgur.com/R6q9ogr.png";
-    if (
-      typeof this.props.album.coverURL !== "undefined" &&
-      !badAlbums.includes(this.props.album.coverURL)
-    ) {
+    if (typeof this.props.album.coverURL !== "undefined") {
       imgSrc = this.props.album.coverURL;
     }
+
+    // Date string
+    const origDateStr = this.props.album.releaseDate.toDateString();
+    const year = this.props.album.releaseDate.getFullYear().toString();
+    const end = origDateStr.indexOf(year) + 4;
+    const dateStr = origDateStr.substr(0, end);
 
     return (
       <>
@@ -78,9 +75,7 @@ export class AlbumCard extends React.Component<AlbumCardProps, AlbumCardState> {
                   this.state.max_artist_len
                 )}
               </p>
-              <p className="text-center">
-                {this.props.album.releaseDate.toDateString()}
-              </p>
+              <p className="text-center">{dateStr}</p>
             </div>
           </div>
           <img
@@ -134,9 +129,7 @@ export class AlbumCard extends React.Component<AlbumCardProps, AlbumCardState> {
                     {this.props.album.title}
                   </Dialog.Title>
                   <p className="text-lg font-bold">{this.props.album.artist}</p>
-                  <p className="text-sm text-gray-500">
-                    {this.props.album.releaseDate.toString()}
-                  </p>
+                  <p className="text-sm text-gray-500">{dateStr}</p>
 
                   <img
                     alt="album cover"
