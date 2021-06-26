@@ -18,6 +18,22 @@
 			"outFiles": [
 				"${workspaceFolder}/**/*.js"
 			]
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Launch merge routine using dupes.json",
+			"skipFiles": [
+				"<node_internals>/**"
+			],
+			"program": "${workspaceFolder}/server/src/scraper/scraper.ts",
+			"args": [
+				"--local",
+				"./server/dist/server/src/scraper/results/dupes.json"
+			],
+			"outFiles": [
+				"${workspaceFolder}/**/*.js"
+			]
 		}
 	]
 }

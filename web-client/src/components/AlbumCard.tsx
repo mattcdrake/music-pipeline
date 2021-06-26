@@ -51,10 +51,10 @@ export class AlbumCard extends React.Component<AlbumCardProps, AlbumCardState> {
     // Placeholder image
     let imgSrc = "https://i.imgur.com/R6q9ogr.png";
     if (
-      typeof this.props.album.coverURL.href !== "undefined" &&
-      !badAlbums.includes(this.props.album.coverURL.href)
+      typeof this.props.album.coverURL !== "undefined" &&
+      !badAlbums.includes(this.props.album.coverURL)
     ) {
-      imgSrc = this.props.album.coverURL.href;
+      imgSrc = this.props.album.coverURL;
     }
 
     return (
