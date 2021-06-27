@@ -192,7 +192,7 @@ class App extends React.Component<IProps, IState> {
       });
     }
 
-    let apiURL: string = `${this.state.apiURL.href}/albums?`;
+    let apiURL: string = `${this.state.apiURL.href}albums?`;
 
     // Append genre query param
     if (this.state.genreFilter) {

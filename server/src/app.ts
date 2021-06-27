@@ -1,6 +1,7 @@
 // Dependencies
 import cors from "cors";
 import express from "express";
+import path from "path";
 import { Datastore } from "@google-cloud/datastore";
 
 // Types
@@ -11,9 +12,11 @@ import { entity } from "@google-cloud/datastore/build/src/entity";
 const PORT = process.env.PORT || 8080;
 const app = express();
 const DEFAULT_PAGE_SIZE = 30;
+const STATIC_DIR = path.resolve(__dirname, "../../../build/");
 
 // Middleware
 app.enable("trust proxy");
+app.use(express.static(STATIC_DIR));
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -26,6 +29,11 @@ if (process.argv.includes("--setupModule")) {
   const setup = require("./setupModule");
   setup.initialSetup();
 }
+
+// Return React front-end
+app.get("/", (req, res) => {
+  res.sendFile(STATIC_DIR + "/index.html");
+});
 
 // Route for reading album data
 app.get("/api/albums/", async (req, res) => {
