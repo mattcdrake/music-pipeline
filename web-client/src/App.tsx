@@ -64,6 +64,7 @@ class App extends React.Component<IProps, IState> {
 
   componentDidMount() {
     document.title = "Music Pipeline";
+    this.getNextPage();
   }
 
   /**
@@ -305,9 +306,9 @@ class App extends React.Component<IProps, IState> {
 
   render() {
     return (
-      <div className="fixed">
+      <div className="fixed w-full">
         <Navbar />
-        <div className="container mx-auto px-4 pt-8">
+        <div className="mx-auto px-4 pt-8">
           <Header />
           <FilterBar
             updateDateFilter={this.updateDateFilter}
