@@ -1,6 +1,6 @@
 # Music Pipeline
 
-![Music Pipeline Teaser](https://imgur.com/aMH0RS1)
+![Music Pipeline Teaser](https://i.imgur.com/aMH0RS1.png)
 
 Music Pipeline is a way to learn about new and upcoming albums from your
 favorite artists.
