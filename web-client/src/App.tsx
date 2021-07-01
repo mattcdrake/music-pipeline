@@ -305,7 +305,7 @@ class App extends React.Component<IProps, IState> {
 
   render() {
     return (
-      <div>
+      <div className="fixed">
         <Navbar />
         <div className="container mx-auto px-4 pt-8">
           <Header />

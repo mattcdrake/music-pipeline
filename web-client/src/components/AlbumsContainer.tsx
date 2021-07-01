@@ -34,7 +34,7 @@ export class AlbumsContainer extends React.Component<
     }
 
     return (
-      <div className="justify-center overflow-visible mx-auto px-4 flex flex-wrap">
+      <div className="border-t border-black justify-center h-screen overflow-scroll mx-auto mt-4 px-4 flex flex-wrap">
         {this.props.albums.map((album) => (
           <AlbumCard key={album.id} album={album} />
         ))}
