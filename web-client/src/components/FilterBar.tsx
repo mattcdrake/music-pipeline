@@ -142,15 +142,15 @@ export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
     }
 
     return (
-      <div className="flex mt-12 mx-auto w-5/6 align-middle">
+      <div className="md:flex mt-4 mx-auto md:w-5/6 align-middle">
         {/* Date filter section */}
         <div>
-          <label className="h-full align-middle m-auto">
+          <label className="font-bold">
             Date Filter:
             {removeDateFilter}
             <input
               type="month"
-              className="border mx-4 align-middle cursor-pointer"
+              className="border w-56 float-right md:float-none cursor-pointer"
               onChange={this.handleDateFilterClick}
               value={this.state.currentDate}
             ></input>
@@ -159,11 +159,11 @@ export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
 
         {/* Genre filter section */}
         <div>
-          <label className="m-auto">
-            Genre Filter
+          <label className="w-full inline-block font-bold">
+            Genre Filter:
             {removeGenreFilter}
             <select
-              className="mx-4"
+              className="border w-56 float-right md:float-none"
               onChange={this.handleGenreClick}
               id="genreFilter"
               name="genres"
@@ -181,11 +181,11 @@ export class FilterBar extends React.Component<FilterBarProps, FilterBarState> {
 
         {/* Text search section */}
         <div>
-          <label>
+          <label className="w-full inline-block font-bold">
             Search:
             <input
               type="text"
-              className="border mx-4"
+              className="border w-56 float-right md:float-none"
               onChange={this.handleSearchChange}
             ></input>
           </label>

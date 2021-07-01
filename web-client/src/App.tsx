@@ -62,6 +62,10 @@ class App extends React.Component<IProps, IState> {
     };
   }
 
+  componentDidMount() {
+    document.title = "Music Pipeline";
+  }
+
   /**
    * Takes an array of albums and merges them into the array of albums in state.
    * Removes duplicates and sorts them in ascending order by time.
