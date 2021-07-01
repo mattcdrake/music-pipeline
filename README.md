@@ -1,5 +1,3 @@
-# Music Pipeline
-
 [![Music Pipeline Teaser](https://i.imgur.com/7G5Uxxm.jpg)](https://musicpipeline.app)
 
 Music Pipeline is a way to learn about new and upcoming albums from your
