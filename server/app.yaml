@@ -1,1 +1,5 @@
 runtime: nodejs14
+
+handlers:
+- url: /build
+  static_dir: build

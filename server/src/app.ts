@@ -24,12 +24,6 @@ app.use(express.json());
 // Datastore
 export const datastore = new Datastore();
 
-// Build album data on setup run
-if (process.argv.includes("--setupModule")) {
-  const setup = require("./setupModule");
-  setup.initialSetup();
-}
-
 // Return React front-end
 app.get("/", (req, res) => {
   res.sendFile(STATIC_DIR + "/index.html");
