@@ -1,4 +1,4 @@
-[Music Pipeline Teaser](https://i.imgur.com/7G5Uxxm.jpg)
+![Music Pipeline Teaser](https://i.imgur.com/7G5Uxxm.jpg)
 
 _This project is archived and no longer hosted_
 
